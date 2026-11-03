@@ -1,0 +1,85 @@
+:root {
+  --bg: #14161a;
+  --surface: #1e2126;
+  --border: #3a3f47;
+  --text: #f2f3f5;
+  --muted: #a6adb8;
+  --expense: #ffb27a;
+  --income: #8cc8ff;
+  --transfer: #c9ced6;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  font-variant-numeric: tabular-nums;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom)
+    env(safe-area-inset-left);
+}
+
+h1 {
+  margin: 0 0 24px;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.login,
+.home {
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 48px 16px;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+label {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+input {
+  height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  /* iOS Safari は 16px 未満の入力欄でズームするため */
+  font-size: 16px;
+}
+
+button {
+  height: 44px;
+  margin-top: 8px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--expense);
+  color: var(--bg);
+  font: inherit;
+  font-weight: 700;
+}
+
+button:disabled {
+  opacity: 0.6;
+}
+
+.error {
+  margin: 4px 0 0;
+  color: var(--expense);
+  font-size: 13px;
+}

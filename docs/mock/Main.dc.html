@@ -1,0 +1,690 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>家計簿 モック</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 844px; box-sizing: border-box; display: flex; flex-direction: column; overflow: hidden; background: #14161A; color: #F2F3F5; font-family: 'Noto Sans JP', sans-serif; font-size: 15px; line-height: 1.5; font-variant-numeric: tabular-nums">
+
+<sc-if value="{{hasToast}}" hint-placeholder-val="{{ false }}">
+<div role="status" style="position: absolute; top: 56px; left: 16px; right: 16px; z-index: 5; box-sizing: border-box; padding: 12px 16px; border-radius: 12px; background: #F2F3F5; color: #14161A; font-size: 14px; font-weight: 700; text-align: center">{{toast}}</div>
+</sc-if>
+
+<sc-if value="{{isEntry}}" hint-placeholder-val="{{ true }}">
+<div style="flex: 1; min-height: 0; display: flex; flex-direction: column">
+<div style="height: 52px; flex: none; display: flex; align-items: center; justify-content: space-between; padding: 0 16px">
+<h1 style="margin: 0; font-size: 20px; font-weight: 700">{{entryTitle}}</h1>
+<sc-if value="{{isEditing}}" hint-placeholder-val="{{ false }}">
+<button type="button" onClick="{{cancelEdit}}" style="height: 44px; padding: 0 8px; border: 0; background: transparent; color: #A6ADB8; font: inherit; font-size: 14px">編集をやめる</button>
+</sc-if>
+</div>
+<div style="flex: 1; min-height: 0; overflow-y: auto; padding: 0 16px 16px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; padding: 4px; border-radius: 12px; background: #1E2126">
+<sc-for list="{{typeChips}}" as="item" hint-placeholder-count="3">
+<button type="button" aria-pressed="{{item.on}}" onClick="{{item.pick}}" style="height: 44px; border: 0; border-radius: 9px; background: {{item.bg}}; color: {{item.fg}}; font: inherit; font-size: 15px; font-weight: {{item.fw}}">{{item.label}}</button>
+</sc-for>
+</div>
+<div style="display: flex; flex-direction: column; gap: 2px">
+<label for="amount" style="font-size: 12px; color: #A6ADB8">金額</label>
+<div style="display: flex; align-items: baseline; gap: 6px; padding-bottom: 4px; border-bottom: 2px solid {{accent}}">
+<span aria-hidden="true" style="font-size: 26px; font-weight: 500; color: {{accent}}">¥</span>
+<input id="amount" inputmode="numeric" autocomplete="off" placeholder="0" value="{{amountText}}" onChange="{{onAmount}}" style="flex: 1; min-width: 0; height: 52px; padding: 0; border: 0; outline: 0; background: transparent; color: #F2F3F5; font: inherit; font-size: 38px; font-weight: 700">
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 4px">
+<label for="date" style="font-size: 12px; color: #A6ADB8">日付</label>
+<input id="date" type="date" value="{{date}}" onChange="{{onDate}}" style="box-sizing: border-box; width: 100%; height: 44px; padding: 0 12px; border: 1px solid #3A3F47; border-radius: 10px; background: #1E2126; color: #F2F3F5; color-scheme: dark; font: inherit">
+</div>
+<fieldset aria-labelledby="catlabel" style="margin: 0; padding: 0; border: 0; display: flex; flex-direction: column; gap: 4px">
+<div style="display: flex; align-items: center; justify-content: space-between; height: 22px">
+<span id="catlabel" style="font-size: 12px; color: #A6ADB8">費目</span>
+<button type="button" onClick="{{openCats}}" style="height: 44px; margin: -11px 0; padding: 0 0 0 12px; border: 0; background: transparent; color: {{accent}}; font: inherit; font-size: 13px; font-weight: 500">編集</button>
+</div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+<sc-for list="{{catChips}}" as="item" hint-placeholder-count="9">
+<button type="button" aria-pressed="{{item.on}}" onClick="{{item.pick}}" style="height: 44px; border: 1px solid {{item.bd}}; border-radius: 10px; background: {{item.bg}}; color: {{item.fg}}; font: inherit; font-size: 14px; font-weight: {{item.fw}}">{{item.label}}</button>
+</sc-for>
+</div>
+</fieldset>
+<fieldset style="margin: 0; padding: 0; border: 0; display: flex; flex-direction: column; gap: 4px">
+<legend style="padding: 0 0 4px; font-size: 12px; color: #A6ADB8">{{payLabel}}</legend>
+<div style="display: flex; gap: 8px">
+<sc-for list="{{payChips}}" as="item" hint-placeholder-count="4">
+<button type="button" aria-pressed="{{item.on}}" onClick="{{item.pick}}" style="flex: 1; min-width: 0; height: 44px; border: 1px solid {{item.bd}}; border-radius: 10px; background: {{item.bg}}; color: {{item.fg}}; font: inherit; font-size: 14px; font-weight: {{item.fw}}">{{item.label}}</button>
+</sc-for>
+</div>
+</fieldset>
+<div style="display: flex; flex-direction: column; gap: 4px">
+<label for="memo" style="font-size: 12px; color: #A6ADB8">メモ(任意)</label>
+<input id="memo" autocomplete="off" placeholder="店名など" value="{{memo}}" onChange="{{onMemo}}" style="box-sizing: border-box; width: 100%; height: 44px; padding: 0 12px; border: 1px solid #3A3F47; border-radius: 10px; background: #1E2126; color: #F2F3F5; font: inherit">
+</div>
+<section aria-label="最近の明細" style="display: flex; flex-direction: column; gap: 4px; padding-top: 8px">
+<h2 style="margin: 0 0 4px; font-size: 14px; font-weight: 700">最近の明細</h2>
+<sc-for list="{{recent}}" as="item" hint-placeholder-count="4">
+<button type="button" onClick="{{item.open}}" style="display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 8px 12px; border: 0; border-radius: 10px; background: #1E2126; color: #F2F3F5; font: inherit; text-align: left">
+<span style="width: 40px; flex: none; font-size: 13px; color: #A6ADB8">{{item.day}}</span>
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+<span style="font-size: 14px; font-weight: 500">{{item.title}}</span>
+<span style="font-size: 12px; color: #A6ADB8">{{item.sub}}</span>
+</span>
+<span style="font-size: 15px; font-weight: 700; color: {{item.color}}">{{item.amountText}}</span>
+</button>
+</sc-for>
+</section>
+</div>
+<div style="flex: none; display: flex; flex-direction: column; gap: 6px; padding: 8px 16px 12px; border-top: 1px solid #2A2E35">
+<sc-if value="{{entryInvalid}}" hint-placeholder-val="{{ false }}">
+<p style="margin: 0; font-size: 12px; color: #A6ADB8; text-align: center">金額と費目を入力してください</p>
+</sc-if>
+<div style="display: flex; gap: 8px">
+<sc-if value="{{isEditing}}" hint-placeholder-val="{{ false }}">
+<button type="button" onClick="{{removeEntry}}" style="width: 88px; height: 48px; flex: none; border: 1px solid #3A3F47; border-radius: 12px; background: transparent; color: #F2F3F5; font: inherit; font-weight: 500">削除</button>
+</sc-if>
+<button type="button" disabled="{{entryInvalid}}" onClick="{{saveEntry}}" style="flex: 1; height: 48px; border: 0; border-radius: 12px; background: {{entryBtnBg}}; color: {{entryBtnFg}}; font: inherit; font-size: 16px; font-weight: 700">{{entryBtn}}</button>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{isFixed}}" hint-placeholder-val="{{ false }}">
+<div style="flex: 1; min-height: 0; display: flex; flex-direction: column">
+<div style="height: 52px; flex: none; display: flex; align-items: center; justify-content: space-between; padding: 0 16px">
+<h1 style="margin: 0; font-size: 20px; font-weight: 700">固定費</h1>
+<button type="button" onClick="{{newFixed}}" style="display: flex; align-items: center; gap: 4px; height: 44px; padding: 0 12px; border: 0; border-radius: 10px; background: #FFB27A; color: #14161A; font: inherit; font-size: 14px; font-weight: 700">
+<svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 3v10M3 8h10"></path></svg>
+追加
+</button>
+</div>
+<div style="flex: 1; min-height: 0; overflow-y: auto; padding: 0 16px 16px; display: flex; flex-direction: column; gap: 12px">
+<div style="padding: 16px; border-radius: 14px; background: #1E2126">
+<div style="font-size: 12px; color: #A6ADB8">月額の合計(年払いは12か月で割る)</div>
+<div style="font-size: 34px; font-weight: 700; line-height: 1.3">{{monthlyTotal}}</div>
+<div style="font-size: 13px; color: #A6ADB8">年額 {{yearlyTotal}}・{{fixedCount}}件</div>
+</div>
+<ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px">
+<sc-for list="{{fixedRows}}" as="item" hint-placeholder-count="6">
+<li>
+<button type="button" onClick="{{item.open}}" style="box-sizing: border-box; width: 100%; display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 10px 12px; border: 0; border-radius: 12px; background: #1E2126; color: #F2F3F5; font: inherit; text-align: left">
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+<span style="font-size: 15px; font-weight: 500">{{item.name}}</span>
+<span style="font-size: 12px; color: #A6ADB8">{{item.sub}}</span>
+</span>
+<span style="flex: none; display: flex; flex-direction: column; align-items: flex-end">
+<span style="font-size: 15px; font-weight: 700">{{item.amountText}}</span>
+<span style="font-size: 12px; color: #A6ADB8">{{item.mode}}</span>
+</span>
+</button>
+</li>
+</sc-for>
+</ul>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{isForm}}" hint-placeholder-val="{{ false }}">
+<div style="flex: 1; min-height: 0; display: flex; flex-direction: column">
+<div style="height: 52px; flex: none; display: flex; align-items: center; gap: 4px; padding: 0 8px">
+<button type="button" aria-label="固定費の一覧に戻る" onClick="{{goFixed}}" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border: 0; background: transparent; color: #F2F3F5">
+<svg aria-hidden="true" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.5 4 6.5 10l6 6"></path></svg>
+</button>
+<h1 style="margin: 0; font-size: 20px; font-weight: 700">{{formTitle}}</h1>
+</div>
+<div style="flex: 1; min-height: 0; overflow-y: auto; padding: 0 16px 16px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 8px">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<label for="fname" style="font-size: 12px; color: #A6ADB8">名前</label>
+<input id="fname" autocomplete="off" placeholder="家賃など" value="{{f.name}}" onChange="{{onFName}}" style="box-sizing: border-box; width: 100%; height: 44px; padding: 0 12px; border: 1px solid #3A3F47; border-radius: 10px; background: #1E2126; color: #F2F3F5; font: inherit">
+</div>
+<div style="display: flex; flex-direction: column; gap: 4px">
+<label for="famount" style="font-size: 12px; color: #A6ADB8">金額(円)</label>
+<input id="famount" inputmode="numeric" autocomplete="off" placeholder="0" value="{{fAmountText}}" onChange="{{onFAmount}}" style="box-sizing: border-box; width: 100%; height: 44px; padding: 0 12px; border: 1px solid #3A3F47; border-radius: 10px; background: #1E2126; color: #F2F3F5; font: inherit; font-weight: 700">
+</div>
+</div>
+<fieldset aria-labelledby="fcatlabel" style="margin: 0; padding: 0; border: 0; display: flex; flex-direction: column; gap: 4px">
+<div style="display: flex; align-items: center; justify-content: space-between; height: 22px">
+<span id="fcatlabel" style="font-size: 12px; color: #A6ADB8">費目</span>
+<button type="button" onClick="{{openFixedCats}}" style="height: 44px; margin: -11px 0; padding: 0 0 0 12px; border: 0; background: transparent; color: #FFB27A; font: inherit; font-size: 13px; font-weight: 500">編集</button>
+</div>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px">
+<sc-for list="{{fCatChips}}" as="item" hint-placeholder-count="8">
+<button type="button" aria-pressed="{{item.on}}" onClick="{{item.pick}}" style="height: 44px; padding: 0 2px; border: 1px solid {{item.bd}}; border-radius: 10px; background: {{item.bg}}; color: {{item.fg}}; font: inherit; font-size: 13px; font-weight: {{item.fw}}">{{item.label}}</button>
+</sc-for>
+</div>
+</fieldset>
+<fieldset style="margin: 0; padding: 0; border: 0; display: flex; flex-direction: column; gap: 4px">
+<legend style="padding: 0 0 4px; font-size: 12px; color: #A6ADB8">支払いの周期</legend>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+<sc-for list="{{cycleChips}}" as="item" hint-placeholder-count="2">
+<button type="button" aria-pressed="{{item.on}}" onClick="{{item.pick}}" style="height: 44px; border: 1px solid {{item.bd}}; border-radius: 10px; background: {{item.bg}}; color: {{item.fg}}; font: inherit; font-size: 14px; font-weight: {{item.fw}}">{{item.label}}</button>
+</sc-for>
+</div>
+</fieldset>
+<div style="display: flex; gap: 8px">
+<sc-if value="{{isYearly}}" hint-placeholder-val="{{ false }}">
+<div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px">
+<label for="fmonth" style="font-size: 12px; color: #A6ADB8">支払月</label>
+<select id="fmonth" value="{{f.month}}" onChange="{{onFMonth}}" style="box-sizing: border-box; width: 100%; height: 44px; padding: 0 12px; border: 1px solid #3A3F47; border-radius: 10px; background: #1E2126; color: #F2F3F5; color-scheme: dark; font: inherit">
+<sc-for list="{{monthOptions}}" as="o" hint-placeholder-count="12"><option value="{{o.v}}">{{o.l}}</option></sc-for>
+</select>
+</div>
+</sc-if>
+<div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px">
+<label for="fday" style="font-size: 12px; color: #A6ADB8">支払日</label>
+<select id="fday" value="{{f.day}}" onChange="{{onFDay}}" style="box-sizing: border-box; width: 100%; height: 44px; padding: 0 12px; border: 1px solid #3A3F47; border-radius: 10px; background: #1E2126; color: #F2F3F5; color-scheme: dark; font: inherit">
+<sc-for list="{{dayOptions}}" as="o" hint-placeholder-count="29"><option value="{{o.v}}">{{o.l}}</option></sc-for>
+</select>
+</div>
+</div>
+<fieldset style="margin: 0; padding: 0; border: 0; display: flex; flex-direction: column; gap: 4px">
+<legend style="padding: 0 0 4px; font-size: 12px; color: #A6ADB8">支払方法</legend>
+<div style="display: flex; gap: 8px">
+<sc-for list="{{fPayChips}}" as="item" hint-placeholder-count="3">
+<button type="button" aria-pressed="{{item.on}}" onClick="{{item.pick}}" style="flex: 1; min-width: 0; height: 44px; border: 1px solid {{item.bd}}; border-radius: 10px; background: {{item.bg}}; color: {{item.fg}}; font: inherit; font-size: 14px; font-weight: {{item.fw}}">{{item.label}}</button>
+</sc-for>
+</div>
+</fieldset>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<label for="fstart" style="font-size: 12px; color: #A6ADB8">開始月</label>
+<input id="fstart" type="month" value="{{f.start}}" onChange="{{onFStart}}" style="box-sizing: border-box; width: 100%; height: 44px; padding: 0 8px; border: 1px solid #3A3F47; border-radius: 10px; background: #1E2126; color: #F2F3F5; color-scheme: dark; font: inherit; font-size: 14px">
+</div>
+<div style="display: flex; flex-direction: column; gap: 4px">
+<label for="fend" style="font-size: 12px; color: #A6ADB8">終了月(任意)</label>
+<input id="fend" type="month" value="{{f.end}}" onChange="{{onFEnd}}" style="box-sizing: border-box; width: 100%; height: 44px; padding: 0 8px; border: 1px solid #3A3F47; border-radius: 10px; background: #1E2126; color: #F2F3F5; color-scheme: dark; font: inherit; font-size: 14px">
+</div>
+</div>
+<div style="display: flex; flex-direction: column; border-radius: 12px; background: #1E2126">
+<sc-for list="{{switches}}" as="item" hint-placeholder-count="2">
+<button type="button" role="switch" aria-checked="{{item.on}}" onClick="{{item.pick}}" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 56px; padding: 6px 12px; border: 0; background: transparent; color: #F2F3F5; font: inherit; text-align: left">
+<span style="display: flex; flex-direction: column">
+<span style="font-size: 14px; font-weight: 500">{{item.label}}</span>
+<span style="font-size: 12px; color: #A6ADB8">{{item.help}}</span>
+</span>
+<span aria-hidden="true" style="flex: none; display: flex; justify-content: {{item.justify}}; width: 44px; height: 26px; box-sizing: border-box; padding: 3px; border-radius: 13px; background: {{item.track}}">
+<span style="width: 20px; height: 20px; border-radius: 10px; background: {{item.knob}}"></span>
+</span>
+</button>
+</sc-for>
+</div>
+</div>
+<div style="flex: none; display: flex; flex-direction: column; gap: 6px; padding: 8px 16px 16px; border-top: 1px solid #2A2E35">
+<sc-if value="{{fixedInvalid}}" hint-placeholder-val="{{ false }}">
+<p style="margin: 0; font-size: 12px; color: #A6ADB8; text-align: center">名前、金額、費目を入力してください</p>
+</sc-if>
+<div style="display: flex; gap: 8px">
+<sc-if value="{{isFixedEditing}}" hint-placeholder-val="{{ false }}">
+<button type="button" onClick="{{removeFixed}}" style="width: 88px; height: 48px; flex: none; border: 1px solid #3A3F47; border-radius: 12px; background: transparent; color: #F2F3F5; font: inherit; font-weight: 500">削除</button>
+</sc-if>
+<button type="button" disabled="{{fixedInvalid}}" onClick="{{saveFixed}}" style="flex: 1; height: 48px; border: 0; border-radius: 12px; background: {{fixedBtnBg}}; color: {{fixedBtnFg}}; font: inherit; font-size: 16px; font-weight: 700">{{fixedBtn}}</button>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{isCalendar}}" hint-placeholder-val="{{ false }}">
+<div style="flex: 1; min-height: 0; display: flex; flex-direction: column">
+<div style="height: 52px; flex: none; display: flex; align-items: center; justify-content: space-between; padding: 0 8px">
+<button type="button" aria-label="前の月" onClick="{{prevMonth}}" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border: 0; background: transparent; color: #F2F3F5">
+<svg aria-hidden="true" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.5 4 6.5 10l6 6"></path></svg>
+</button>
+<h1 style="margin: 0; font-size: 20px; font-weight: 700">{{calTitle}}</h1>
+<button type="button" aria-label="次の月" onClick="{{nextMonth}}" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border: 0; background: transparent; color: #F2F3F5">
+<svg aria-hidden="true" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7.5 4 6 6-6 6"></path></svg>
+</button>
+</div>
+<div style="flex: 1; min-height: 0; overflow-y: auto; padding: 0 12px 16px; display: flex; flex-direction: column; gap: 10px">
+<div style="padding: 12px 14px; border-radius: 14px; background: #1E2126">
+<div style="font-size: 12px; color: #A6ADB8">月の支払い(予定を含む)</div>
+<div style="font-size: 30px; font-weight: 700; line-height: 1.3">{{monthTotal}}</div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 8px">
+<div style="display: flex; flex-direction: column">
+<span style="font-size: 12px; color: #A6ADB8">支払い済み</span>
+<span style="font-size: 14px; font-weight: 700">{{monthPaid}}</span>
+</div>
+<div style="display: flex; flex-direction: column">
+<span style="font-size: 12px; color: #A6ADB8">これから</span>
+<span style="font-size: 14px; font-weight: 700; color: #A6ADB8">{{monthPlanned}}</span>
+</div>
+<div style="display: flex; flex-direction: column">
+<span style="font-size: 12px; color: #A6ADB8">収入</span>
+<span style="font-size: 14px; font-weight: 700; color: #8CC8FF">{{monthIncome}}</span>
+</div>
+</div>
+</div>
+<div>
+<div aria-hidden="true" style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; padding-bottom: 4px">
+<sc-for list="{{weekdays}}" as="w" hint-placeholder-count="7">
+<span style="font-size: 12px; color: #A6ADB8; text-align: center">{{w}}</span>
+</sc-for>
+</div>
+<div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px">
+<sc-for list="{{calCells}}" as="c" hint-placeholder-count="30">
+<button type="button" aria-label="{{c.label}}" aria-pressed="{{c.on}}" onClick="{{c.pick}}" style="grid-column-start: {{c.col}}; min-width: 0; height: 56px; display: flex; flex-direction: column; align-items: center; padding: 3px 0; border: 1px solid {{c.bd}}; border-radius: 8px; background: {{c.bg}}; font: inherit; overflow: hidden">
+<span style="font-size: 13px; line-height: 1.3; font-weight: {{c.dayW}}; color: {{c.dayColor}}">{{c.day}}</span>
+<span style="font-size: 11px; line-height: 1.3; letter-spacing: -0.2px; white-space: nowrap; color: {{c.payColor}}">{{c.pay}}</span>
+<span style="font-size: 11px; line-height: 1.3; letter-spacing: -0.2px; white-space: nowrap; color: #8CC8FF">{{c.income}}</span>
+</button>
+</sc-for>
+</div>
+<p style="margin: 6px 0 0; font-size: 12px; color: #A6ADB8">白い金額は支払い済み、グレーは支払い予定です。</p>
+</div>
+<section aria-label="選択した日の内訳" style="display: flex; flex-direction: column; gap: 4px">
+<h2 style="margin: 0 0 4px; font-size: 14px; font-weight: 700">{{dayTitle}}</h2>
+<sc-if value="{{dayEmpty}}" hint-placeholder-val="{{ false }}">
+<p style="margin: 0; padding: 12px; border-radius: 10px; background: #1E2126; font-size: 13px; color: #A6ADB8">この日の記録はありません</p>
+</sc-if>
+<sc-for list="{{dayRows}}" as="item" hint-placeholder-count="2">
+<button type="button" onClick="{{item.open}}" style="display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 8px 12px; border: 0; border-radius: 10px; background: #1E2126; color: #F2F3F5; font: inherit; text-align: left">
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+<span style="font-size: 14px; font-weight: 500">{{item.title}}</span>
+<span style="font-size: 12px; color: #A6ADB8">{{item.sub}}</span>
+</span>
+<span style="font-size: 15px; font-weight: 700; color: {{item.color}}">{{item.amountText}}</span>
+</button>
+</sc-for>
+</section>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{isCats}}" hint-placeholder-val="{{ false }}">
+<div style="flex: 1; min-height: 0; display: flex; flex-direction: column">
+<div style="height: 52px; flex: none; display: flex; align-items: center; gap: 4px; padding: 0 8px">
+<button type="button" aria-label="前の画面に戻る" onClick="{{closeCats}}" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border: 0; background: transparent; color: #F2F3F5">
+<svg aria-hidden="true" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.5 4 6.5 10l6 6"></path></svg>
+</button>
+<h1 style="margin: 0; font-size: 20px; font-weight: 700">費目の編集</h1>
+</div>
+<div style="flex: 1; min-height: 0; overflow-y: auto; padding: 0 16px 16px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; padding: 4px; border-radius: 12px; background: #1E2126">
+<sc-for list="{{catKindChips}}" as="item" hint-placeholder-count="4">
+<button type="button" aria-pressed="{{item.on}}" onClick="{{item.pick}}" style="height: 44px; border: 0; border-radius: 9px; background: {{item.bg}}; color: {{item.fg}}; font: inherit; font-size: 14px; font-weight: {{item.fw}}">{{item.label}}</button>
+</sc-for>
+</div>
+<div style="display: flex; flex-direction: column; gap: 4px">
+<label for="catname" style="font-size: 12px; color: #A6ADB8">{{catInputLabel}}</label>
+<div style="display: flex; gap: 8px">
+<input id="catname" autocomplete="off" placeholder="費目の名前" value="{{catName}}" onChange="{{onCatName}}" style="box-sizing: border-box; flex: 1; min-width: 0; height: 44px; padding: 0 12px; border: 1px solid #3A3F47; border-radius: 10px; background: #1E2126; color: #F2F3F5; font: inherit">
+<button type="button" disabled="{{catInvalid}}" onClick="{{saveCat}}" style="width: 72px; height: 44px; flex: none; border: 0; border-radius: 10px; background: {{catBtnBg}}; color: {{catBtnFg}}; font: inherit; font-size: 14px; font-weight: 700">{{catBtn}}</button>
+</div>
+<sc-if value="{{catDuplicate}}" hint-placeholder-val="{{ false }}">
+<p style="margin: 0; font-size: 12px; color: #A6ADB8">同じ名前の費目があります</p>
+</sc-if>
+</div>
+<ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px">
+<sc-for list="{{catRows}}" as="item" hint-placeholder-count="9">
+<li style="display: flex; align-items: center; min-height: 52px; padding-right: 4px; border-radius: 10px; background: #1E2126">
+<button type="button" onClick="{{item.edit}}" style="flex: 1; min-width: 0; height: 52px; padding: 0 12px; border: 0; background: transparent; color: #F2F3F5; font: inherit; font-size: 15px; font-weight: {{item.fw}}; text-align: left">{{item.name}}</button>
+<button type="button" aria-label="{{item.upLabel}}" disabled="{{item.first}}" onClick="{{item.up}}" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border: 0; background: transparent; color: {{item.upColor}}">
+<svg aria-hidden="true" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14V4M4.5 8.5 9 4l4.5 4.5"></path></svg>
+</button>
+<button type="button" aria-label="{{item.downLabel}}" disabled="{{item.last}}" onClick="{{item.down}}" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border: 0; background: transparent; color: {{item.downColor}}">
+<svg aria-hidden="true" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4v10M4.5 9.5 9 14l4.5-4.5"></path></svg>
+</button>
+<button type="button" aria-label="{{item.removeLabel}}" onClick="{{item.remove}}" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border: 0; background: transparent; color: #F2F3F5">
+<svg aria-hidden="true" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m4.5 4.5 9 9M13.5 4.5l-9 9"></path></svg>
+</button>
+</li>
+</sc-for>
+</ul>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{showTabs}}" hint-placeholder-val="{{ true }}">
+<nav aria-label="メイン" style="flex: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); height: 64px; border-top: 1px solid #2A2E35; background: #1A1C20">
+<button type="button" aria-current="{{entryCurrent}}" onClick="{{goEntry}}" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; border: 0; background: transparent; color: {{entryTabColor}}; font: inherit; font-size: 12px; font-weight: 500">
+<svg aria-hidden="true" width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18l1-4L15.5 3.5a1.8 1.8 0 0 1 2.5 0l.5.5a1.8 1.8 0 0 1 0 2.5L8 17l-4 1Z"></path></svg>
+入力
+</button>
+<button type="button" aria-current="{{calCurrent}}" onClick="{{goCalendar}}" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; border: 0; background: transparent; color: {{calTabColor}}; font: inherit; font-size: 12px; font-weight: 500">
+<svg aria-hidden="true" width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="16" height="14" rx="2"></rect><path d="M3 9h16M7.5 3v4M14.5 3v4M7 13h.01M11 13h.01M15 13h.01"></path></svg>
+カレンダー
+</button>
+<button type="button" aria-current="{{fixedCurrent}}" onClick="{{goFixed}}" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; border: 0; background: transparent; color: {{fixedTabColor}}; font: inherit; font-size: 12px; font-weight: 500">
+<svg aria-hidden="true" width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a7.5 7.5 0 0 0-13-1.5L3.5 8M4 14a7.5 7.5 0 0 0 13 1.5l1.5-1.5"></path><path d="M3.5 4v4h4M18.5 18v-4h-4"></path></svg>
+固定費
+</button>
+</nav>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"start":{"editor":null,"default":"entry"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  state = {
+    screen: 'entry', type: 'expense', amount: '1280', date: '2026-11-03', cat: '食費', pay: 'QR', memo: 'スーパー', editId: null, toast: '',
+    calYear: 2026, calMonth: 11, calDay: 3,
+    catKind: 'expense', catName: '', catEdit: null, catReturn: 'entry',
+    cats: {
+      expense: ['食費', '日用品', '交通費', '交際費', '趣味', '医療', '衣服', '特別費', 'その他'],
+      income: ['給与', '賞与', '副業', '還付', 'その他'],
+      transfer: ['投資', '貯金', '口座間の移動', 'その他'],
+      fixed: ['住居', '水道光熱', '通信', '保険', 'サブスク', 'ローン', '車', 'その他']
+    },
+    tx: [
+      { id: 1, type: 'expense', date: '2026-11-03', cat: '食費', pay: 'QR', memo: 'スーパー', amount: 2140 },
+      { id: 2, type: 'expense', date: '2026-11-02', cat: '交通費', pay: 'カード', memo: '電車', amount: 680 },
+      { id: 3, type: 'expense', date: '2026-11-01', cat: '日用品', pay: 'カード', memo: 'ドラッグストア', amount: 1320 },
+      { id: 5, type: 'transfer', date: '2026-11-01', cat: '投資', pay: '口座', memo: 'つみたて', amount: 30000 },
+      { id: 4, type: 'income', date: '2026-10-25', cat: '給与', pay: '口座', memo: '10月分', amount: 280000 }
+    ],
+    fixed: [
+      { id: 1, name: '家賃', amount: 72000, cat: '住居', cycle: 'monthly', month: '1', day: '27', pay: '口座', start: '2026-01', end: '', variable: false, auto: true },
+      { id: 2, name: '電気', amount: 8000, cat: '水道光熱', cycle: 'monthly', month: '1', day: '15', pay: 'カード', start: '2026-01', end: '', variable: true, auto: true },
+      { id: 3, name: 'スマホ', amount: 2970, cat: '通信', cycle: 'monthly', month: '1', day: '20', pay: 'カード', start: '2026-01', end: '', variable: false, auto: true },
+      { id: 4, name: '動画配信', amount: 1590, cat: 'サブスク', cycle: 'monthly', month: '1', day: '10', pay: 'カード', start: '2026-01', end: '', variable: false, auto: true },
+      { id: 5, name: '保険', amount: 3500, cat: '保険', cycle: 'monthly', month: '1', day: '5', pay: '口座', start: '2026-01', end: '', variable: false, auto: true },
+      { id: 6, name: 'クラウド保存', amount: 13200, cat: 'サブスク', cycle: 'yearly', month: '4', day: '1', pay: 'カード', start: '2026-04', end: '', variable: false, auto: false }
+    ],
+    f: { id: null, name: '', amount: '', cat: '', cycle: 'monthly', month: '1', day: '1', pay: 'カード', start: '2026-11', end: '', variable: false, auto: true }
+  };
+
+  componentDidMount() {
+    const start = this.props.start ?? 'entry';
+    if (start === 'income') this.setState({ type: 'income', amount: '280000', cat: '給与', pay: '口座', memo: '11月分' });
+    if (start === 'fixed') this.setState({ screen: 'fixed' });
+    if (start === 'calendar') this.setState({ screen: 'calendar', calDay: 27 });
+    if (start === 'categories') this.setState({ screen: 'categories' });
+    if (start === 'fixedForm') this.setState({ screen: 'fixedForm', f: { ...this.state.f, name: 'ジム会費', amount: '8800', cat: 'サブスク' } });
+  }
+
+  showToast(text) {
+    this.setState({ toast: text });
+    clearTimeout(this.toastTimer);
+    this.toastTimer = setTimeout(() => this.setState({ toast: '' }), 1800);
+  }
+
+  renderVals() {
+    const s = this.state;
+    const ORANGE = '#FFB27A', BLUE = '#8CC8FF', MUTED = '#A6ADB8';
+    const num = (n) => Number(n || 0).toLocaleString('ja-JP');
+    const yen = (n) => '¥' + num(n);
+    const digits = (v) => String(v).replace(/\D/g, '').slice(0, 9);
+    const chip = (label, on, color, pick) => ({
+      label, on, pick,
+      bg: on ? color : '#1E2126', fg: on ? '#14161A' : '#F2F3F5',
+      bd: on ? color : '#3A3F47', fw: on ? 700 : 500
+    });
+    const field = (k) => (e) => this.setState({ [k]: e.target.value });
+    const patchF = (patch) => this.setState({ f: { ...this.state.f, ...patch } });
+    const fieldF = (k) => (e) => patchF({ [k]: e.target.value });
+
+    const NEUTRAL = '#C9CED6';
+    const isIncome = s.type === 'income';
+    const isTransfer = s.type === 'transfer';
+    const accent = isIncome ? BLUE : isTransfer ? NEUTRAL : ORANGE;
+    const txAmount = (t) => (t.type === 'income' ? '+' : t.type === 'transfer' ? '' : '-') + yen(t.amount);
+    const txColor = (t) => (t.type === 'income' ? BLUE : t.type === 'transfer' ? MUTED : '#F2F3F5');
+    const resetEntry = () => ({ amount: '', cat: '', memo: '', editId: null });
+    const setType = (type) => () => this.setState({ type, ...resetEntry(), pay: type === 'expense' ? 'カード' : '口座' });
+    const cats = s.cats[s.type];
+    const pays = isIncome ? ['口座', '現金'] : isTransfer ? ['口座', 'カード', '現金'] : ['現金', 'カード', 'QR', '口座'];
+    const entryInvalid = !Number(s.amount) || !s.cat;
+
+    const saveEntry = () => {
+      if (entryInvalid) return;
+      const row = { id: s.editId ?? Date.now(), type: s.type, date: s.date, cat: s.cat, pay: s.pay, memo: s.memo, amount: Number(s.amount) };
+      const tx = (s.editId ? s.tx.map((t) => (t.id === s.editId ? row : t)) : [row, ...s.tx]).slice().sort((a, b) => b.date.localeCompare(a.date));
+      this.setState({ tx, ...resetEntry() });
+      this.showToast(s.editId ? '更新しました' : '登録しました');
+    };
+    const removeEntry = () => {
+      this.setState({ tx: s.tx.filter((t) => t.id !== s.editId), ...resetEntry() });
+      this.showToast('削除しました');
+    };
+
+    const dayText = (d) => (d === 'end' ? '月末' : d + '日');
+    const cycleText = (x) => (x.cycle === 'yearly' ? '毎年' + x.month + '月' + dayText(x.day) : '毎月' + dayText(x.day));
+    const dayRank = (x) => (x.day === 'end' ? 32 : Number(x.day));
+    const monthly = s.fixed.reduce((sum, x) => sum + (x.cycle === 'yearly' ? x.amount / 12 : x.amount), 0);
+    const fixedInvalid = !s.f.name.trim() || !Number(s.f.amount) || !s.f.cat;
+    const blankF = () => ({ id: null, name: '', amount: '', cat: '', cycle: 'monthly', month: '1', day: '1', pay: 'カード', start: '2026-11', end: '', variable: false, auto: true });
+
+    const saveFixed = () => {
+      if (fixedInvalid) return;
+      const row = { ...s.f, name: s.f.name.trim(), amount: Number(s.f.amount), id: s.f.id ?? Date.now() };
+      const fixed = s.f.id ? s.fixed.map((x) => (x.id === s.f.id ? row : x)) : [...s.fixed, row];
+      this.setState({ fixed, screen: 'fixed', f: blankF() });
+      this.showToast(s.f.id ? '更新しました' : '登録しました');
+    };
+    const removeFixed = () => {
+      this.setState({ fixed: s.fixed.filter((x) => x.id !== s.f.id), screen: 'fixed', f: blankF() });
+      this.showToast('削除しました');
+    };
+
+    const toggle = (label, help, key) => {
+      const on = s.f[key];
+      return {
+        label, help, on, pick: () => patchF({ [key]: !on }),
+        justify: on ? 'flex-end' : 'flex-start', track: on ? ORANGE : '#3A3F47', knob: on ? '#14161A' : '#F2F3F5'
+      };
+    };
+
+    const dayOptions = Array.from({ length: 28 }, (_, i) => ({ v: String(i + 1), l: i + 1 + '日' })).concat([{ v: 'end', l: '月末' }]);
+    const monthOptions = Array.from({ length: 12 }, (_, i) => ({ v: String(i + 1), l: i + 1 + '月' }));
+    const go = (screen) => () => this.setState({ screen });
+
+    // カレンダー
+    const TODAY = '2026-11-03';
+    const pad = (n) => String(n).padStart(2, '0');
+    const vy = s.calYear, vm = s.calMonth;
+    const ym = vy + '-' + pad(vm);
+    const lastDay = new Date(vy, vm, 0).getDate();
+    const firstCol = new Date(vy, vm - 1, 1).getDay() + 1;
+    const dateOf = (d) => ym + '-' + pad(d);
+    const occurrences = s.fixed
+      .filter((x) => (x.cycle === 'monthly' || Number(x.month) === vm) && x.start <= ym && (!x.end || x.end >= ym))
+      .map((x) => {
+        const date = dateOf(x.day === 'end' ? lastDay : Math.min(Number(x.day), lastDay));
+        return { x, date, planned: date > TODAY };
+      });
+    const monthTx = s.tx.filter((t) => t.date.startsWith(ym));
+    const dayStats = (date) => {
+      const paidTx = monthTx.filter((t) => t.date === date && t.type === 'expense').reduce((n, t) => n + t.amount, 0);
+      const paidFixed = occurrences.filter((o) => o.date === date && !o.planned).reduce((n, o) => n + o.x.amount, 0);
+      const planned = occurrences.filter((o) => o.date === date && o.planned).reduce((n, o) => n + o.x.amount, 0);
+      const income = monthTx.filter((t) => t.date === date && t.type === 'income').reduce((n, t) => n + t.amount, 0);
+      return { paid: paidTx + paidFixed, planned, income };
+    };
+    let paidSum = 0, plannedSum = 0, incomeSum = 0;
+    const calCells = [];
+    for (let d = 1; d <= lastDay; d++) {
+      const date = dateOf(d);
+      const st = dayStats(date);
+      paidSum += st.paid; plannedSum += st.planned; incomeSum += st.income;
+      const on = d === s.calDay;
+      const isToday = date === TODAY;
+      const payTotal = st.paid + st.planned;
+      calCells.push({
+        day: d, on,
+        col: d === 1 ? firstCol : 'auto',
+        pay: payTotal ? num(payTotal) : '',
+        income: st.income ? '+' + num(st.income) : '',
+        payColor: st.paid ? '#F2F3F5' : MUTED,
+        dayColor: isToday ? ORANGE : '#F2F3F5',
+        dayW: isToday ? 700 : 400,
+        bd: on ? ORANGE : 'transparent',
+        bg: on ? '#2A2E35' : '#1A1C20',
+        label: vm + '月' + d + '日 支払い' + yen(payTotal) + (st.income ? ' 収入' + yen(st.income) : ''),
+        pick: () => this.setState({ calDay: d })
+      });
+    }
+    const shiftMonth = (delta) => () => {
+      const next = new Date(vy, vm - 1 + delta, 1);
+      this.setState({ calYear: next.getFullYear(), calMonth: next.getMonth() + 1, calDay: 1 });
+    };
+    const selectedDate = dateOf(s.calDay);
+    const dayRows = monthTx.filter((t) => t.date === selectedDate).map((t) => ({
+      title: t.memo || t.cat,
+      sub: t.cat + '・' + t.pay,
+      amountText: txAmount(t),
+      color: txColor(t),
+      open: () => this.setState({ screen: 'entry', type: t.type, amount: String(t.amount), date: t.date, cat: t.cat, pay: t.pay, memo: t.memo, editId: t.id })
+    })).concat(occurrences.filter((o) => o.date === selectedDate).map((o) => ({
+      title: o.x.name,
+      sub: '固定費・' + (o.planned ? '支払い予定' : '支払い済み') + '・' + o.x.pay,
+      amountText: (o.x.variable ? '約' : '') + yen(o.x.amount),
+      color: o.planned ? MUTED : '#F2F3F5',
+      open: () => this.setState({ screen: 'fixedForm', f: { ...o.x, amount: String(o.x.amount) } })
+    })));
+
+    // 費目
+    const kindNames = { expense: '支出', income: '収入', transfer: '振替/投資', fixed: '固定費' };
+    const kindList = s.cats[s.catKind];
+    const catTrim = s.catName.trim();
+    const catDuplicate = !!catTrim && catTrim !== s.catEdit && kindList.includes(catTrim);
+    const catInvalid = !catTrim || catDuplicate;
+    const writeKind = (list, extra) => this.setState({ cats: { ...s.cats, [s.catKind]: list }, ...(extra || {}) });
+    const usedBy = (name) => (s.catKind === 'fixed'
+      ? s.fixed.some((x) => x.cat === name)
+      : s.tx.some((t) => t.type === s.catKind && t.cat === name));
+    const saveCat = () => {
+      if (catInvalid) return;
+      if (s.catEdit) {
+        const list = kindList.map((c) => (c === s.catEdit ? catTrim : c));
+        const swap = (c) => (c === s.catEdit ? catTrim : c);
+        const extra = s.catKind === 'fixed'
+          ? { fixed: s.fixed.map((x) => ({ ...x, cat: swap(x.cat) })), f: { ...s.f, cat: swap(s.f.cat) } }
+          : { tx: s.tx.map((t) => (t.type === s.catKind ? { ...t, cat: swap(t.cat) } : t)), cat: swap(s.cat) };
+        writeKind(list, { ...extra, catName: '', catEdit: null });
+        this.showToast('更新しました');
+      } else {
+        writeKind([...kindList, catTrim], { catName: '' });
+        this.showToast('追加しました');
+      }
+    };
+    const moveCat = (i, delta) => () => {
+      const list = kindList.slice();
+      const [name] = list.splice(i, 1);
+      list.splice(i + delta, 0, name);
+      writeKind(list);
+    };
+    const removeCat = (name) => () => {
+      const used = usedBy(name);
+      writeKind(kindList.filter((c) => c !== name), { catName: '', catEdit: null });
+      this.showToast(used ? '選択肢から外しました。過去の記録には残ります' : '削除しました');
+    };
+    const openCatsFor = (catKind) => () => this.setState({ screen: 'categories', catKind, catReturn: s.screen, catName: '', catEdit: null });
+
+    return {
+      isEntry: s.screen === 'entry', isFixed: s.screen === 'fixed', isForm: s.screen === 'fixedForm',
+      isCalendar: s.screen === 'calendar', isCats: s.screen === 'categories',
+      showTabs: s.screen !== 'fixedForm' && s.screen !== 'categories',
+
+      calTitle: vy + '年' + vm + '月',
+      prevMonth: shiftMonth(-1), nextMonth: shiftMonth(1),
+      monthTotal: yen(paidSum + plannedSum), monthPaid: yen(paidSum), monthPlanned: yen(plannedSum), monthIncome: yen(incomeSum),
+      weekdays: ['日', '月', '火', '水', '木', '金', '土'],
+      calCells, dayRows,
+      dayEmpty: dayRows.length === 0,
+      dayTitle: vm + '月' + s.calDay + '日の内訳',
+
+      openCats: openCatsFor(s.type),
+      openFixedCats: openCatsFor('fixed'),
+      closeCats: go(s.catReturn),
+      catKindChips: Object.keys(kindNames).map((k) => chip(kindNames[k], s.catKind === k, ORANGE, () => this.setState({ catKind: k, catName: '', catEdit: null }))),
+      catInputLabel: s.catEdit ? '「' + s.catEdit + '」の名前を変更' : kindNames[s.catKind] + 'の費目を追加',
+      catName: s.catName,
+      onCatName: field('catName'),
+      catDuplicate, catInvalid, saveCat,
+      catBtn: s.catEdit ? '更新' : '追加',
+      catBtnBg: catInvalid ? '#2A2E35' : ORANGE,
+      catBtnFg: catInvalid ? MUTED : '#14161A',
+      catRows: kindList.map((name, i) => ({
+        name,
+        fw: name === s.catEdit ? 700 : 400,
+        first: i === 0, last: i === kindList.length - 1,
+        upColor: i === 0 ? '#5B626D' : '#F2F3F5',
+        downColor: i === kindList.length - 1 ? '#5B626D' : '#F2F3F5',
+        upLabel: name + 'を上へ移動', downLabel: name + 'を下へ移動', removeLabel: name + 'を削除',
+        edit: () => this.setState({ catName: name, catEdit: name }),
+        up: moveCat(i, -1), down: moveCat(i, 1), remove: removeCat(name)
+      })),
+      hasToast: !!s.toast, toast: s.toast,
+      accent, date: s.date, memo: s.memo,
+      entryTitle: s.editId ? '明細を編集' : '入力',
+      isEditing: !!s.editId,
+      payLabel: isIncome ? '入金先' : isTransfer ? '出金元' : '支払方法',
+      typeChips: [
+        chip('支出', s.type === 'expense', ORANGE, setType('expense')),
+        chip('収入', isIncome, BLUE, setType('income')),
+        chip('振替/投資', isTransfer, NEUTRAL, setType('transfer'))
+      ],
+      catChips: cats.map((c) => chip(c, s.cat === c, accent, () => this.setState({ cat: c }))),
+      payChips: pays.map((p) => chip(p, s.pay === p, accent, () => this.setState({ pay: p }))),
+      amountText: s.amount ? num(s.amount) : '',
+      onAmount: (e) => this.setState({ amount: digits(e.target.value) }),
+      onDate: field('date'), onMemo: field('memo'),
+      recent: s.tx.slice(0, 5).map((t) => {
+        const [, m, d] = t.date.split('-');
+        return {
+          day: Number(m) + '/' + Number(d),
+          title: t.memo || t.cat,
+          sub: t.cat + '・' + t.pay,
+          amountText: txAmount(t),
+          color: txColor(t),
+          open: () => this.setState({ type: t.type, amount: String(t.amount), date: t.date, cat: t.cat, pay: t.pay, memo: t.memo, editId: t.id })
+        };
+      }),
+      entryInvalid, saveEntry, removeEntry,
+      cancelEdit: () => this.setState(resetEntry()),
+      entryBtn: s.editId ? '更新する' : '登録する',
+      entryBtnBg: entryInvalid ? '#2A2E35' : accent,
+      entryBtnFg: entryInvalid ? MUTED : '#14161A',
+
+      newFixed: () => this.setState({ screen: 'fixedForm', f: blankF() }),
+      monthlyTotal: yen(Math.round(monthly)),
+      yearlyTotal: yen(Math.round(monthly * 12)),
+      fixedCount: s.fixed.length,
+      fixedRows: s.fixed.slice().sort((a, b) => dayRank(a) - dayRank(b)).map((x) => ({
+        name: x.name,
+        sub: cycleText(x) + '・' + x.cat + '・' + x.pay,
+        amountText: (x.variable ? '約' : '') + yen(x.amount),
+        mode: x.auto ? '自動で記録' : '手動で記録',
+        open: () => this.setState({ screen: 'fixedForm', f: { ...x, amount: String(x.amount) } })
+      })),
+
+      f: s.f,
+      formTitle: s.f.id ? '固定費を編集' : '固定費を登録',
+      isFixedEditing: !!s.f.id,
+      isYearly: s.f.cycle === 'yearly',
+      fAmountText: s.f.amount ? num(s.f.amount) : '',
+      onFName: fieldF('name'),
+      onFAmount: (e) => patchF({ amount: digits(e.target.value) }),
+      onFMonth: fieldF('month'), onFDay: fieldF('day'), onFStart: fieldF('start'), onFEnd: fieldF('end'),
+      fCatChips: s.cats.fixed.map((c) => chip(c, s.f.cat === c, ORANGE, () => patchF({ cat: c }))),
+      cycleChips: [['monthly', '毎月'], ['yearly', '毎年']].map(([v, l]) => chip(l, s.f.cycle === v, ORANGE, () => patchF({ cycle: v }))),
+      fPayChips: ['カード', '口座', '現金'].map((p) => chip(p, s.f.pay === p, ORANGE, () => patchF({ pay: p }))),
+      switches: [
+        toggle('金額が毎回変わる', '登録額を見込みとして記録', 'variable'),
+        toggle('支払日に自動で明細へ記録', 'オフなら記録は手動', 'auto')
+      ],
+      dayOptions, monthOptions,
+      fixedInvalid, saveFixed, removeFixed,
+      fixedBtn: s.f.id ? '更新する' : '登録する',
+      fixedBtnBg: fixedInvalid ? '#2A2E35' : ORANGE,
+      fixedBtnFg: fixedInvalid ? MUTED : '#14161A',
+
+      goEntry: go('entry'), goFixed: go('fixed'), goCalendar: go('calendar'),
+      entryCurrent: s.screen === 'entry' ? 'page' : undefined,
+      calCurrent: s.screen === 'calendar' ? 'page' : undefined,
+      fixedCurrent: s.screen === 'fixed' ? 'page' : undefined,
+      entryTabColor: s.screen === 'entry' ? ORANGE : MUTED,
+      calTabColor: s.screen === 'calendar' ? ORANGE : MUTED,
+      fixedTabColor: s.screen === 'fixed' ? ORANGE : MUTED
+    };
+  }
+}
+</script>
+</body>
+</html>
