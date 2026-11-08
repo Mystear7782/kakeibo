@@ -57,6 +57,7 @@ export type Database = {
           end_month: string | null
           id: string
           is_month_end: boolean
+          is_subscription: boolean
           is_variable: boolean
           name: string
           pay_day: number | null
@@ -77,6 +78,7 @@ export type Database = {
           end_month?: string | null
           id?: string
           is_month_end?: boolean
+          is_subscription?: boolean
           is_variable?: boolean
           name: string
           pay_day?: number | null
@@ -97,6 +99,7 @@ export type Database = {
           end_month?: string | null
           id?: string
           is_month_end?: boolean
+          is_subscription?: boolean
           is_variable?: boolean
           name?: string
           pay_day?: number | null
@@ -219,6 +222,23 @@ export type Database = {
           name: string
           payment_method: string
           status: string
+        }[]
+      }
+      get_subscription_summary: {
+        Args: { p_year?: number }
+        Returns: {
+          amount: number
+          cycle: string
+          end_month: string
+          fixed_cost_id: string
+          is_cancelled: boolean
+          monthly_amount: number
+          name: string
+          paid_in_year: number
+          paid_total: number
+          payment_method: string
+          start_month: string
+          yearly_amount: number
         }[]
       }
       jst_today: { Args: never; Returns: string }
