@@ -26,7 +26,18 @@ body,
   height: 100%;
 }
 
+/* 画面全体はスクロールさせず、各画面の中身(.scroll)だけをスクロールさせる。
+   iOS Safari で、端までスクロールしたときに画面全体が引っ張られてヘッダーやタブが動くのを防ぐ */
+html,
 body {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+body {
+  position: fixed;
+  inset: 0;
+  width: 100%;
   margin: 0;
   background: var(--bg);
   color: var(--text);
@@ -57,9 +68,12 @@ button {
 
 /* ---- ログイン ---- */
 .login {
+  height: 100%;
   max-width: 420px;
   margin: 0 auto;
   padding: calc(48px + env(safe-area-inset-top)) 16px 48px;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
 }
 
 .login h1 {
@@ -104,7 +118,7 @@ button {
   position: relative;
   display: flex;
   flex-direction: column;
-  height: 100dvh;
+  height: 100%;
   max-width: 480px;
   margin: 0 auto;
   padding-top: env(safe-area-inset-top);
@@ -155,10 +169,19 @@ button {
 .scroll {
   flex: 1;
   min-height: 0;
+  overflow-x: hidden;
   overflow-y: auto;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
   padding: 0 16px 16px;
   display: flex;
   flex-direction: column;
+}
+
+/* flex の子が内容の幅まで縮まず、画面からはみ出すのを防ぐ */
+.scroll > * {
+  min-width: 0;
+  flex-shrink: 0;
 }
 
 .footer {
@@ -335,7 +358,10 @@ button {
 
 input,
 select {
+  display: block;
   width: 100%;
+  min-width: 0;
+  max-width: 100%;
   height: 44px;
   padding: 0 12px;
   border: 1px solid var(--border);
@@ -345,6 +371,29 @@ select {
   /* iOS Safari は 16px 未満の入力欄でズームするため */
   font-size: 16px;
   color-scheme: dark;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* iOS Safari の日付・月の入力欄は、標準の見た目だと内容の幅で枠からはみ出し、
+   左右にスクロールできてしまう。標準の見た目を外して、幅を枠に合わせる */
+input[type='date'],
+input[type='month'] {
+  text-align: left;
+  line-height: 42px;
+}
+
+input[type='date']::-webkit-date-and-time-value,
+input[type='month']::-webkit-date-and-time-value {
+  min-height: 1.2em;
+  text-align: left;
+}
+
+select {
+  padding-right: 32px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none' stroke='%23a6adb8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m1 1.5 5 5 5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
 }
 
 input.strong {
@@ -365,7 +414,8 @@ input.strong {
 }
 
 .amount-row input {
-  flex: 1;
+  flex: 1 1 0;
+  width: 0;
   min-width: 0;
   height: 52px;
   padding: 0;
