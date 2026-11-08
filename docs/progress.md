@@ -9,7 +9,7 @@
 | 0 開始前の確認 | 完了 | `supabase link` で qdgcqzlmoelwgtuttvwp に接続済み |
 | 1 DB | 完了 | マイグレーション適用済み。RLSは3テーブルで有効、cronジョブ `post-fixed-costs` 登録済み、匿名キーでの読み取りは拒否を確認 |
 | 2 PWA基盤 | 完了（iPhone確認のみ後回し） | PCのChromeでログインを確認。新規登録は無効化済み（`disable_signup = true`） |
-| 3 画面 | 未着手 | サブスク画面の追加を検討中（下記） |
+| 3 画面 | 実装済み・実DBでの確認待ち | 入力、費目、固定費、サブスク、カレンダー。メモリ上のAPI（`npm run dev:fake`）で操作を確認。実DBでの確認は本人のログインが必要 |
 | 4 MCP | 未着手 | |
 | 5 CSV取り込み | 未着手 | |
 
