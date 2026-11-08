@@ -420,3 +420,11 @@ enabled = true
 # formatted with uppercase keywords, indent 2, max width 180, trailing commas,
 # and column/key alignment. Set to "null" to emit raw, unformatted SQL.
 # format_options = "{\"keywordCase\":\"upper\",\"indent\":2,\"maxWidth\":180,\"commaStyle\":\"trailing\"}"
+
+# MCPサーバー(Edge Function)。トークンの検証は関数側(@supabase/server)で行うため、
+# ゲートウェイのJWT検証は無効にする（有効だと認可メタデータの取得が401で止まる）。
+# 本番のAuth設定(Site URL、OAuth Server、署名鍵)はダッシュボードで管理する。
+# `supabase config push` は使わない（既定値で本番のAuth設定を上書きしてしまうため）。
+[functions.mcp]
+enabled = true
+verify_jwt = false

@@ -6,12 +6,15 @@
   "scripts": {
     "dev": "vite",
     "dev:fake": "vite --mode fake",
-    "build": "tsc --noEmit && vite build",
+    "build": "tsc --noEmit && tsc -p tsconfig.functions.json && vite build",
     "preview": "vite preview",
     "test": "vitest run --passWithNoTests",
-    "types": "supabase gen types --remote --schema public > src/types/database.ts"
+    "types": "supabase gen types --remote --schema public > src/types/database.ts && node scripts/sync-types.mjs"
   },
   "devDependencies": {
+    "@modelcontextprotocol/server": "^2.4.0",
+    "@supabase/middleware": "^1.0.0",
+    "@supabase/server": "^1.9.2",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.2.1",
@@ -19,7 +22,8 @@
     "typescript": "^7.0.2",
     "vite": "^8.3.5",
     "vite-plugin-pwa": "^2.0.0",
-    "vitest": "^5.1.0"
+    "vitest": "^5.1.0",
+    "zod": "^4.6.7"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.118.0",

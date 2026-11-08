@@ -30,7 +30,10 @@ export default defineConfig({
       workbox: {
         // API 応答はキャッシュしない。画面の静的ファイルだけをキャッシュする
         navigateFallback: `${base}index.html`,
+        // OAuth の同意画面は単独の静的ページ。クエリ付きで開かれるため、キャッシュやフォールバックの対象にしない
+        navigateFallbackDenylist: [/oauth-consent\.html/],
         globPatterns: ['**/*.{js,css,html,png,svg}'],
+        globIgnores: ['oauth-consent.*'],
       },
     }),
   ],
