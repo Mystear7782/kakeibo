@@ -116,6 +116,8 @@ describe('buildCalendar', () => {
     expect(summary.paid).toBe(500)
     expect(summary.income).toBe(0)
     expect(summary.days[3].paid).toBe(500)
+    // 月の支払いには入らないが、別枠の合計には出る
+    expect(summary.transfer).toBe(30000)
   })
 
   it('収入は日ごとと月の合計に出る', () => {
@@ -127,7 +129,7 @@ describe('buildCalendar', () => {
 
   it('記録がない月は0になる', () => {
     const summary = buildCalendar([], [])
-    expect(summary).toEqual({ days: {}, paid: 0, planned: 0, income: 0 })
+    expect(summary).toEqual({ days: {}, paid: 0, planned: 0, income: 0, transfer: 0 })
   })
 })
 

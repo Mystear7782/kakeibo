@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>PC 固定費</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#14161A}
+</style>
+</helmet>
+<div style="min-height: 900px; display: flex; flex-wrap: wrap; background: #14161A; color: #F2F3F5; font-family: 'Noto Sans JP', sans-serif; font-size: 14px; line-height: 1.5; font-variant-numeric: tabular-nums">
+
+<nav aria-label="メイン" style="flex: 1 1 200px; max-width: 220px; box-sizing: border-box; display: flex; flex-direction: column; gap: 4px; padding: 20px 12px; border-right: 1px solid #2A2E35; background: #1A1C20">
+<div style="padding: 4px 12px 20px; font-size: 18px; font-weight: 700">家計簿</div>
+<sc-for list="{{nav}}" as="n" hint-placeholder-count="4">
+<a href="{{n.href}}" aria-current="{{n.current}}" style="display: flex; align-items: center; height: 44px; padding: 0 12px; border-radius: 10px; background: {{n.bg}}; color: {{n.fg}}; font-size: 14px; font-weight: 500; text-decoration: none">{{n.label}}</a>
+</sc-for>
+</nav>
+
+<main style="flex: 999 1 560px; min-width: 0; box-sizing: border-box; display: flex; flex-wrap: wrap; gap: 24px; align-content: flex-start; padding: 24px 28px">
+
+<section aria-label="固定費の一覧" style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 12px">
+<h1 style="margin: 0; font-size: 24px; font-weight: 700">固定費</h1>
+<button type="button" onClick="{{newRow}}" style="height: 40px; padding: 0 16px; border: 0; border-radius: 10px; background: #FFB27A; color: #14161A; font: inherit; font-size: 14px; font-weight: 700">+ 追加</button>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px">
+<sc-for list="{{stats}}" as="s" hint-placeholder-count="3">
+<div style="padding: 14px 16px; border-radius: 12px; background: #1E2126">
+<div style="font-size: 12px; color: #A6ADB8">{{s.label}}</div>
+<div style="font-size: 22px; font-weight: 700">{{s.value}}</div>
+</div>
+</sc-for>
+</div>
+<div style="overflow-x: auto; border-radius: 14px; background: #1E2126">
+<table style="width: 100%; min-width: 640px; border-collapse: collapse">
+<thead>
+<tr style="text-align: left; font-size: 12px; color: #A6ADB8">
+<th scope="col" style="padding: 12px 16px; font-weight: 500">名前</th>
+<th scope="col" style="padding: 12px 8px; font-weight: 500">費目</th>
+<th scope="col" style="padding: 12px 8px; font-weight: 500">支払日</th>
+<th scope="col" style="padding: 12px 8px; font-weight: 500">支払方法</th>
+<th scope="col" style="padding: 12px 8px; font-weight: 500">記録</th>
+<th scope="col" style="padding: 12px 16px; font-weight: 500; text-align: right">金額</th>
+</tr>
+</thead>
+<tbody>
+<sc-for list="{{rows}}" as="r" hint-placeholder-count="6">
+<tr style="border-top: 1px solid #2A2E35; background: {{r.bg}}">
+<td style="padding: 0 16px"><button type="button" onClick="{{r.pick}}" style="height: 48px; padding: 0; border: 0; background: transparent; color: #F2F3F5; font: inherit; font-weight: 500; text-align: left">{{r.name}}</button></td>
+<td style="padding: 0 8px">{{r.cat}}</td>
+<td style="padding: 0 8px">{{r.when}}</td>
+<td style="padding: 0 8px">{{r.pay}}</td>
+<td style="padding: 0 8px; color: #A6ADB8">{{r.mode}}</td>
+<td style="padding: 0 16px; text-align: right; font-weight: 700">{{r.amount}}</td>
+</tr>
+</sc-for>
+</tbody>
+</table>
+</div>
+<p style="margin: 0; font-size: 12px; color: #A6ADB8">行の名前を選ぶと右側で編集できます。年払いは月額合計に12分の1で含めます。</p>
+</section>
+
+<aside aria-label="固定費の編集" style="flex: 1 1 340px; max-width: 400px; min-width: 0">
+<form style="display: flex; flex-direction: column; gap: 12px; padding: 16px; border-radius: 14px; background: #1E2126">
+<h2 style="margin: 0; font-size: 16px; font-weight: 700">{{formTitle}}</h2>
+<div style="display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 8px">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<label for="pf-name" style="font-size: 12px; color: #A6ADB8">名前</label>
+<input id="pf-name" value="{{f.name}}" placeholder="家賃など" style="box-sizing: border-box; width: 100%; height: 44px; padding: 0 12px; border: 1px solid #3A3F47; border-radius: 10px; background: #14161A; color: #F2F3F5; font: inherit">
+</div>
+<div style="display: flex; flex-direction: column; gap: 4px">
+<label for="pf-amount" style="font-size: 12px; color: #A6ADB8">金額(円)</label>
+<input id="pf-amount" value="{{f.amountText}}" inputmode="numeric" placeholder="0" style="box-sizing: border-box; width: 100%; height: 44px; padding: 0 12px; border: 1px solid #3A3F47; border-radius: 10px; background: #14161A; color: #F2F3F5; font: inherit; font-weight: 700">
+</div>
+</div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<label for="pf-cat" style="font-size: 12px; color: #A6ADB8">費目</label>
+<input id="pf-cat" value="{{f.cat}}" style="box-sizing: border-box; width: 100%; height: 44px; padding: 0 12px; border: 1px solid #3A3F47; border-radius: 10px; background: #14161A; color: #F2F3F5; font: inherit">
+</div>
+<div style="display: flex; flex-direction: column; gap: 4px">
+<label for="pf-when" style="font-size: 12px; color: #A6ADB8">周期と支払日</label>
+<input id="pf-when" value="{{f.when}}" style="box-sizing: border-box; width: 100%; height: 44px; padding: 0 12px; border: 1px solid #3A3F47; border-radius: 10px; background: #14161A; color: #F2F3F5; font: inherit">
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 4px">
+<label for="pf-pay" style="font-size: 12px; color: #A6ADB8">支払方法</label>
+<input id="pf-pay" value="{{f.pay}}" style="box-sizing: border-box; width: 100%; height: 44px; padding: 0 12px; border: 1px solid #3A3F47; border-radius: 10px; background: #14161A; color: #F2F3F5; font: inherit">
+</div>
+<p style="margin: 0; font-size: 12px; color: #A6ADB8">開始月、終了月、金額が変わる、自動記録の項目はモバイル版と同じです(省略)。</p>
+<div style="display: flex; gap: 8px">
+<sc-if value="{{editing}}" hint-placeholder-val="{{ true }}">
+<button type="button" style="width: 88px; height: 44px; border: 1px solid #3A3F47; border-radius: 10px; background: transparent; color: #F2F3F5; font: inherit">削除</button>
+</sc-if>
+<button type="button" style="flex: 1; height: 44px; border: 0; border-radius: 10px; background: #FFB27A; color: #14161A; font: inherit; font-size: 15px; font-weight: 700">{{saveLabel}}</button>
+</div>
+</form>
+</aside>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  state = { sel: 1 };
+
+  renderVals() {
+    const yen = (n) => '¥' + n.toLocaleString('ja-JP');
+    const data = [
+      { id: 1, name: '家賃', cat: '住居', when: '毎月27日', pay: '口座', amount: 72000, monthly: 72000, auto: true },
+      { id: 2, name: '電気', cat: '水道光熱', when: '毎月15日', pay: 'カード', amount: 8000, monthly: 8000, auto: true, variable: true },
+      { id: 3, name: 'スマホ', cat: '通信', when: '毎月20日', pay: 'カード', amount: 2970, monthly: 2970, auto: true },
+      { id: 4, name: '動画配信', cat: 'サブスク', when: '毎月10日', pay: 'カード', amount: 1590, monthly: 1590, auto: true },
+      { id: 5, name: '保険', cat: '保険', when: '毎月5日', pay: '口座', amount: 3500, monthly: 3500, auto: true },
+      { id: 6, name: 'クラウド保存', cat: 'サブスク', when: '毎年4月1日', pay: 'カード', amount: 13200, monthly: 1100, auto: false }
+    ];
+    const total = data.reduce((n, x) => n + x.monthly, 0);
+    const cur = data.find((x) => x.id === this.state.sel);
+    const navItem = (label, on, href) => ({ label, href, current: on ? 'page' : undefined, bg: on ? '#2A2E35' : 'transparent', fg: on ? '#FFB27A' : '#F2F3F5' });
+    return {
+      nav: [navItem('ホーム', false, 'PcHome.dc.html'), navItem('固定費', true, '#'), navItem('サブスク', false, '#'), navItem('費目', false, '#')],
+      stats: [
+        { label: '月額の合計', value: yen(total) },
+        { label: '年額', value: yen(total * 12) },
+        { label: '件数', value: data.length + '件' }
+      ],
+      rows: data.map((x) => ({
+        name: x.name, cat: x.cat, when: x.when, pay: x.pay,
+        mode: x.auto ? '自動' : '手動',
+        amount: (x.variable ? '約' : '') + yen(x.amount),
+        bg: x.id === this.state.sel ? '#2A2E35' : 'transparent',
+        pick: () => this.setState({ sel: x.id })
+      })),
+      newRow: () => this.setState({ sel: null }),
+      editing: !!cur,
+      formTitle: cur ? '「' + cur.name + '」を編集' : '固定費を登録',
+      saveLabel: cur ? '更新する' : '登録する',
+      f: cur ? { name: cur.name, amountText: cur.amount.toLocaleString('ja-JP'), cat: cur.cat, when: cur.when, pay: cur.pay } : { name: '', amountText: '', cat: '', when: '', pay: '' }
+    };
+  }
+}
+</script>
+</body>
+</html>

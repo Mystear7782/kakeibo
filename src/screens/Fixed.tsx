@@ -7,25 +7,22 @@ import {
   fixedTotals,
   isEnded,
   sortFixedByDay,
-  type Category,
   type FixedCost,
 } from '../lib/model'
+import { useApp } from '../state'
 import { COLORS, Header, Screen, Scroll } from '../ui'
 
 type Props = {
-  fixedCosts: FixedCost[]
-  categories: Category[]
-  email: string
   onNew: () => void
   onOpen: (fixed: FixedCost) => void
-  onSignOut: () => void
 }
 
 export function amountText(f: Pick<FixedCost, 'amount' | 'is_variable'>): string {
   return `${f.is_variable ? '約' : ''}${yen(f.amount)}`
 }
 
-export function FixedScreen({ fixedCosts, categories, email, onNew, onOpen, onSignOut }: Props) {
+export function FixedScreen({ onNew, onOpen }: Props) {
+  const { fixedCosts, categories, email, onSignOut } = useApp()
   const thisMonth = monthOf(todayJst())
   const catName = useMemo(() => new Map(categories.map((c) => [c.id, c.name])), [categories])
   const totals = fixedTotals(fixedCosts, thisMonth)

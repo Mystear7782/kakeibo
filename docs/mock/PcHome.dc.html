@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>PC ホーム</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#14161A}
+</style>
+</helmet>
+<div style="min-height: 900px; display: flex; flex-wrap: wrap; background: #14161A; color: #F2F3F5; font-family: 'Noto Sans JP', sans-serif; font-size: 14px; line-height: 1.5; font-variant-numeric: tabular-nums">
+
+<nav aria-label="メイン" style="flex: 1 1 200px; max-width: 220px; box-sizing: border-box; display: flex; flex-direction: column; gap: 4px; padding: 20px 12px; border-right: 1px solid #2A2E35; background: #1A1C20">
+<div style="padding: 4px 12px 20px; font-size: 18px; font-weight: 700">家計簿</div>
+<sc-for list="{{nav}}" as="n" hint-placeholder-count="4">
+<a href="{{n.href}}" aria-current="{{n.current}}" style="display: flex; align-items: center; gap: 10px; height: 44px; padding: 0 12px; border-radius: 10px; background: {{n.bg}}; color: {{n.fg}}; font-size: 14px; font-weight: 500; text-decoration: none">{{n.label}}</a>
+</sc-for>
+<div style="flex: 1"></div>
+<div style="padding: 0 12px; font-size: 12px; color: #A6ADB8">[ログイン中のメール]</div>
+<button type="button" style="height: 40px; margin-top: 4px; border: 1px solid #3A3F47; border-radius: 10px; background: transparent; color: #F2F3F5; font: inherit; font-size: 13px">ログアウト</button>
+</nav>
+
+<main style="flex: 999 1 560px; min-width: 0; box-sizing: border-box; display: flex; flex-wrap: wrap; gap: 24px; align-content: flex-start; padding: 24px 28px">
+
+<section aria-label="カレンダー" style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; align-items: center; gap: 8px">
+<button type="button" aria-label="前の月" onClick="{{noop}}" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border: 1px solid #3A3F47; border-radius: 10px; background: transparent; color: #F2F3F5">
+<svg aria-hidden="true" width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.5 4 6.5 10l6 6"></path></svg>
+</button>
+<h1 style="margin: 0 8px; font-size: 24px; font-weight: 700">2026年11月</h1>
+<button type="button" aria-label="次の月" onClick="{{noop}}" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border: 1px solid #3A3F47; border-radius: 10px; background: transparent; color: #F2F3F5">
+<svg aria-hidden="true" width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7.5 4 6 6-6 6"></path></svg>
+</button>
+<button type="button" style="height: 40px; margin-left: 4px; padding: 0 14px; border: 1px solid #3A3F47; border-radius: 10px; background: transparent; color: #F2F3F5; font: inherit; font-size: 13px">今月</button>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px">
+<sc-for list="{{stats}}" as="s" hint-placeholder-count="5">
+<div style="padding: 14px 16px; border-radius: 12px; background: #1E2126">
+<div style="font-size: 12px; color: #A6ADB8">{{s.label}}</div>
+<div style="font-size: 22px; font-weight: 700; color: {{s.color}}">{{s.value}}</div>
+</div>
+</sc-for>
+</div>
+
+<div style="border-radius: 14px; background: #1E2126; padding: 12px">
+<div aria-hidden="true" style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; padding: 0 0 8px">
+<sc-for list="{{weekdays}}" as="w" hint-placeholder-count="7">
+<span style="padding-left: 8px; font-size: 12px; color: #A6ADB8">{{w}}</span>
+</sc-for>
+</div>
+<div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px">
+<sc-for list="{{cells}}" as="c" hint-placeholder-count="30">
+<button type="button" aria-label="{{c.label}}" aria-pressed="{{c.on}}" onClick="{{c.pick}}" style="grid-column-start: {{c.col}}; min-width: 0; height: 92px; box-sizing: border-box; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 8px; border: 1px solid {{c.bd}}; border-radius: 10px; background: {{c.bg}}; font: inherit; text-align: left; overflow: hidden">
+<span style="font-size: 13px; font-weight: {{c.dayW}}; color: {{c.dayColor}}">{{c.day}}</span>
+<span style="font-size: 13px; font-weight: 700; color: #F2F3F5">{{c.paid}}</span>
+<span style="font-size: 12px; color: #A6ADB8">{{c.planned}}</span>
+<span style="font-size: 12px; color: #8CC8FF">{{c.income}}</span>
+</button>
+</sc-for>
+</div>
+<p style="margin: 10px 4px 0; font-size: 12px; color: #A6ADB8">白は支払い済み、グレーは予定(固定費)、青は収入です。日付を選ぶと右に内訳が出て、入力の日付もその日になります。</p>
+</div>
+</section>
+
+<aside aria-label="入力と内訳" style="flex: 1 1 340px; max-width: 400px; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+<form style="display: flex; flex-direction: column; gap: 12px; padding: 16px; border-radius: 14px; background: #1E2126">
+<h2 style="margin: 0; font-size: 16px; font-weight: 700">入力</h2>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; padding: 4px; border-radius: 10px; background: #14161A">
+<sc-for list="{{types}}" as="t" hint-placeholder-count="3">
+<button type="button" aria-pressed="{{t.on}}" onClick="{{t.pick}}" style="height: 36px; border: 0; border-radius: 8px; background: {{t.bg}}; color: {{t.fg}}; font: inherit; font-size: 13px; font-weight: {{t.fw}}">{{t.label}}</button>
+</sc-for>
+</div>
+<div style="display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 8px">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<label for="pc-amount" style="font-size: 12px; color: #A6ADB8">金額(円)</label>
+<input id="pc-amount" inputmode="numeric" placeholder="0" style="box-sizing: border-box; width: 100%; height: 44px; padding: 0 12px; border: 1px solid {{accent}}; border-radius: 10px; background: #14161A; color: #F2F3F5; font: inherit; font-size: 18px; font-weight: 700">
+</div>
+<div style="display: flex; flex-direction: column; gap: 4px">
+<label for="pc-date" style="font-size: 12px; color: #A6ADB8">日付</label>
+<input id="pc-date" type="date" value="{{date}}" style="box-sizing: border-box; width: 100%; height: 44px; padding: 0 8px; border: 1px solid #3A3F47; border-radius: 10px; background: #14161A; color: #F2F3F5; color-scheme: dark; font: inherit; font-size: 13px">
+</div>
+</div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<label for="pc-cat" style="font-size: 12px; color: #A6ADB8">費目</label>
+<select id="pc-cat" style="box-sizing: border-box; width: 100%; height: 44px; padding: 0 10px; border: 1px solid #3A3F47; border-radius: 10px; background: #14161A; color: #F2F3F5; color-scheme: dark; font: inherit">
+<sc-for list="{{cats}}" as="o" hint-placeholder-count="5"><option>{{o}}</option></sc-for>
+</select>
+</div>
+<div style="display: flex; flex-direction: column; gap: 4px">
+<label for="pc-pay" style="font-size: 12px; color: #A6ADB8">{{payLabel}}</label>
+<select id="pc-pay" style="box-sizing: border-box; width: 100%; height: 44px; padding: 0 10px; border: 1px solid #3A3F47; border-radius: 10px; background: #14161A; color: #F2F3F5; color-scheme: dark; font: inherit">
+<sc-for list="{{pays}}" as="o" hint-placeholder-count="4"><option>{{o}}</option></sc-for>
+</select>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 4px">
+<label for="pc-memo" style="font-size: 12px; color: #A6ADB8">メモ(任意)</label>
+<input id="pc-memo" placeholder="店名など" style="box-sizing: border-box; width: 100%; height: 44px; padding: 0 12px; border: 1px solid #3A3F47; border-radius: 10px; background: #14161A; color: #F2F3F5; font: inherit">
+</div>
+<button type="button" style="height: 44px; border: 0; border-radius: 10px; background: {{accent}}; color: #14161A; font: inherit; font-size: 15px; font-weight: 700">登録する(Enter)</button>
+</form>
+
+<section aria-label="選択した日の内訳" style="display: flex; flex-direction: column; gap: 6px; padding: 16px; border-radius: 14px; background: #1E2126">
+<h2 style="margin: 0 0 4px; font-size: 16px; font-weight: 700">{{dayTitle}}</h2>
+<sc-if value="{{dayEmpty}}" hint-placeholder-val="{{ false }}">
+<p style="margin: 0; font-size: 13px; color: #A6ADB8">この日の記録はありません</p>
+</sc-if>
+<sc-for list="{{dayRows}}" as="r" hint-placeholder-count="2">
+<button type="button" style="display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 6px 10px; border: 0; border-radius: 10px; background: #14161A; color: #F2F3F5; font: inherit; text-align: left">
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+<span style="font-size: 14px; font-weight: 500">{{r.title}}</span>
+<span style="font-size: 12px; color: #A6ADB8">{{r.sub}}</span>
+</span>
+<span style="font-size: 14px; font-weight: 700; color: {{r.color}}">{{r.amount}}</span>
+</button>
+</sc-for>
+</section>
+</aside>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  state = { day: 3, type: 'expense' };
+
+  renderVals() {
+    const s = this.state;
+    const ORANGE = '#FFB27A', BLUE = '#8CC8FF', NEUTRAL = '#C9CED6', MUTED = '#A6ADB8';
+    const yen = (n) => '¥' + n.toLocaleString('ja-JP');
+    const TODAY = 3;
+    const tx = {
+      1: [{ title: 'ドラッグストア', sub: '日用品・カード', amount: 1320, type: 'expense' }, { title: 'つみたて', sub: '投資・口座', amount: 30000, type: 'transfer' }],
+      2: [{ title: '電車', sub: '交通費・カード', amount: 680, type: 'expense' }],
+      3: [{ title: 'スーパー', sub: '食費・QR', amount: 2140, type: 'expense' }]
+    };
+    const plan = {
+      5: [{ title: '保険', sub: '固定費・予定・口座', amount: 3500 }],
+      10: [{ title: '動画配信', sub: '固定費・予定・カード', amount: 1590 }],
+      15: [{ title: '電気', sub: '固定費・予定・カード', amount: 8000 }],
+      20: [{ title: 'スマホ', sub: '固定費・予定・カード', amount: 2970 }],
+      25: [],
+      27: [{ title: '家賃', sub: '固定費・予定・口座', amount: 72000 }]
+    };
+    const income = { 25: 280000 };
+    const firstCol = new Date(2026, 10, 1).getDay() + 1;
+    let paid = 0, planned = 0, inc = 0, trans = 0;
+    const cells = [];
+    for (let d = 1; d <= 30; d++) {
+      const p = (tx[d] || []).filter((t) => t.type === 'expense').reduce((n, t) => n + t.amount, 0);
+      const t = (tx[d] || []).filter((t) => t.type === 'transfer').reduce((n, t) => n + t.amount, 0);
+      const pl = (plan[d] || []).reduce((n, x) => n + x.amount, 0);
+      const i = income[d] || 0;
+      paid += p; planned += pl; inc += i; trans += t;
+      const on = d === s.day;
+      cells.push({
+        day: d, on, col: d === 1 ? firstCol : 'auto',
+        paid: p ? yen(p) : '', planned: pl ? '予定 ' + yen(pl) : '', income: i ? '+' + yen(i) : '',
+        dayColor: d === TODAY ? ORANGE : '#F2F3F5', dayW: d === TODAY ? 700 : 400,
+        bd: on ? ORANGE : 'transparent', bg: on ? '#2A2E35' : '#181A1E',
+        label: '11月' + d + '日',
+        pick: () => this.setState({ day: d })
+      });
+    }
+    const dayRows = (tx[s.day] || []).map((t) => ({
+      title: t.title, sub: t.sub,
+      amount: (t.type === 'transfer' ? '' : '-') + yen(t.amount),
+      color: t.type === 'transfer' ? MUTED : '#F2F3F5'
+    })).concat((plan[s.day] || []).map((x) => ({ title: x.title, sub: x.sub, amount: yen(x.amount), color: MUTED })))
+      .concat(income[s.day] ? [{ title: '給与', sub: '収入・口座', amount: '+' + yen(income[s.day]), color: BLUE }] : []);
+
+    const isIncome = s.type === 'income', isTransfer = s.type === 'transfer';
+    const accent = isIncome ? BLUE : isTransfer ? NEUTRAL : ORANGE;
+    const typeChip = (id, label, color) => {
+      const on = s.type === id;
+      return { label, on, pick: () => this.setState({ type: id }), bg: on ? color : 'transparent', fg: on ? '#14161A' : '#F2F3F5', fw: on ? 700 : 500 };
+    };
+    const navItem = (label, on, href) => ({ label, href, current: on ? 'page' : undefined, bg: on ? '#2A2E35' : 'transparent', fg: on ? ORANGE : '#F2F3F5' });
+
+    return {
+      noop: () => {},
+      nav: [navItem('ホーム', true, '#'), navItem('固定費', false, 'PcFixed.dc.html'), navItem('サブスク', false, '#'), navItem('費目', false, '#')],
+      stats: [
+        { label: '月の支払い(予定を含む)', value: yen(paid + planned), color: '#F2F3F5' },
+        { label: '支払い済み', value: yen(paid), color: '#F2F3F5' },
+        { label: 'これから', value: yen(planned), color: MUTED },
+        { label: '収入', value: yen(inc), color: BLUE },
+        { label: '振替/投資', value: yen(trans), color: NEUTRAL }
+      ],
+      weekdays: ['日', '月', '火', '水', '木', '金', '土'],
+      cells, dayRows,
+      dayEmpty: dayRows.length === 0,
+      dayTitle: '11月' + s.day + '日の内訳',
+      date: '2026-11-' + String(s.day).padStart(2, '0'),
+      types: [typeChip('expense', '支出', ORANGE), typeChip('income', '収入', BLUE), typeChip('transfer', '振替/投資', NEUTRAL)],
+      accent,
+      cats: isIncome ? ['給与', '賞与', '副業', '還付', 'その他'] : isTransfer ? ['投資', '貯金', '口座間の移動', 'その他'] : ['食費', '日用品', '交通費', '交際費', '趣味', '医療', '衣服', '特別費', 'その他'],
+      pays: isIncome ? ['口座', '現金'] : isTransfer ? ['口座', 'カード', '現金'] : ['現金', 'カード', 'QR', '口座'],
+      payLabel: isIncome ? '入金先' : isTransfer ? '出金元' : '支払方法'
+    };
+  }
+}
+</script>
+</body>
+</html>

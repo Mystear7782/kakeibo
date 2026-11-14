@@ -33,6 +33,16 @@ export function firstWeekday(ym: string): number {
   return new Date(Date.UTC(y, m - 1, 1)).getUTCDay()
 }
 
+/** 月を前後に動かしたときの選択。選ぶ日は、今月なら今日、それ以外は1日 */
+export function shiftedSelection(
+  month: string,
+  delta: number,
+  today: string = todayJst(),
+): { month: string; day: number } {
+  const next = addMonths(month, delta)
+  return { month: next, day: next === monthOf(today) ? Number(today.slice(8, 10)) : 1 }
+}
+
 export const dateOf = (ym: string, day: number): string => `${ym}-${pad(day)}`
 
 export const monthStart = (ym: string): string => `${ym}-01`

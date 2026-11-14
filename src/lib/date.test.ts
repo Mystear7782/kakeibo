@@ -1,5 +1,23 @@
 import { describe, expect, it } from 'vitest'
-import { addMonths, daysInMonth, firstWeekday, monthEnd, shortDate, todayJst } from './date'
+import { addMonths, daysInMonth, firstWeekday, monthEnd, shiftedSelection, shortDate, todayJst } from './date'
+
+describe('shiftedSelection', () => {
+  const today = '2026-11-14'
+
+  it('今月に動かしたときは今日を選ぶ', () => {
+    expect(shiftedSelection('2026-12', -1, today)).toEqual({ month: '2026-11', day: 14 })
+    expect(shiftedSelection('2026-10', 1, today)).toEqual({ month: '2026-11', day: 14 })
+  })
+
+  it('今月以外に動かしたときは1日を選ぶ', () => {
+    expect(shiftedSelection('2026-11', 1, today)).toEqual({ month: '2026-12', day: 1 })
+    expect(shiftedSelection('2026-11', -1, today)).toEqual({ month: '2026-10', day: 1 })
+  })
+
+  it('年をまたぐ', () => {
+    expect(shiftedSelection('2026-12', 1, today)).toEqual({ month: '2027-01', day: 1 })
+  })
+})
 
 describe('todayJst', () => {
   it('UTC の夕方は日本ではすでに翌日になる', () => {

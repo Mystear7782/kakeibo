@@ -120,6 +120,8 @@ export interface CalendarSummary {
   paid: number
   planned: number
   income: number
+  /** 振替/投資の合計。月の支払いには含めず、別枠で表示する */
+  transfer: number
 }
 
 // 月の支払いは「支出の明細 + 未記録の固定費」。振替/投資は含めない
@@ -130,7 +132,7 @@ export function buildCalendar(
   const days: Record<number, DayStat> = {}
   const dayOf = (date: string) => Number(date.slice(8, 10))
   const stat = (date: string): DayStat => (days[dayOf(date)] ??= { paid: 0, planned: 0, income: 0 })
-  const summary: CalendarSummary = { days, paid: 0, planned: 0, income: 0 }
+  const summary: CalendarSummary = { days, paid: 0, planned: 0, income: 0, transfer: 0 }
 
   for (const t of transactions) {
     if (t.type === 'expense') {
@@ -139,6 +141,8 @@ export function buildCalendar(
     } else if (t.type === 'income') {
       stat(t.occurred_on).income += t.amount
       summary.income += t.amount
+    } else if (t.type === 'transfer') {
+      summary.transfer += t.amount
     }
   }
   for (const row of schedule) {

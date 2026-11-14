@@ -1,12 +1,19 @@
 import type { Session } from '@supabase/supabase-js'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { FAKE_API } from './api'
 import { Login } from './Login'
+import { DesktopShell } from './DesktopShell'
 import { Shell } from './Shell'
 import { supabase } from './lib/supabase'
+import { useIsDesktop } from './lib/useIsDesktop'
+import { AppProvider } from './state'
+
+const noop = () => undefined
 
 export function App() {
   const [session, setSession] = useState<Session | null | undefined>(undefined)
+  const isDesktop = useIsDesktop()
+  const signOut = useCallback(() => void supabase.auth.signOut(), [])
 
   useEffect(() => {
     if (FAKE_API) return
@@ -15,10 +22,23 @@ export function App() {
     return () => data.subscription.unsubscribe()
   }, [])
 
-  if (FAKE_API) return <Shell email="demo@example.com" onSignOut={() => undefined} />
+  // 幅が変わっても AppProvider は入れ替えない。入力中の内容や選択中の月日、ログイン状態を残すため
+  const shell = isDesktop ? <DesktopShell /> : <Shell />
+
+  if (FAKE_API) {
+    return (
+      <AppProvider email="demo@example.com" onSignOut={noop}>
+        {shell}
+      </AppProvider>
+    )
+  }
   if (session === undefined) return null
   if (!session) return <Login />
 
   // ユーザーが変わったら状態を持ち越さないよう key で作り直す
-  return <Shell key={session.user.id} email={session.user.email ?? ''} onSignOut={() => supabase.auth.signOut()} />
+  return (
+    <AppProvider key={session.user.id} email={session.user.email ?? ''} onSignOut={signOut}>
+      {shell}
+    </AppProvider>
+  )
 }
