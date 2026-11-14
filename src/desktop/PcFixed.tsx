@@ -4,11 +4,12 @@ import { num, yen } from '../lib/format'
 import {
   PAY_LABELS,
   cycleLabel,
+  filterFixed,
   fixedTotals,
   isEnded,
   sortFixedByDay,
 } from '../lib/model'
-import { amountText } from '../screens/Fixed'
+import { FixedFilterSwitch, amountText, emptyFixedMessage } from '../screens/Fixed'
 import { useApp } from '../state'
 import { FixedPanel } from './FixedPanel'
 
@@ -22,14 +23,20 @@ type Props = {
 
 /** PC版の固定費ページ。左に一覧表、右に編集フォーム */
 export function PcFixed({ selection, onSelect }: Props) {
-  const { fixedCosts, categories, changed } = useApp()
+  const { fixedCosts, categories, changed, fixedFilter, setFixedFilter } = useApp()
   const thisMonth = monthOf(todayJst())
   const catName = useMemo(() => new Map(categories.map((c) => [c.id, c.name])), [categories])
-  const totals = fixedTotals(fixedCosts, thisMonth)
+  const shown = filterFixed(fixedCosts, fixedFilter)
+  const totals = fixedTotals(shown, thisMonth)
+  const emptyMessage = shown.length === 0 ? emptyFixedMessage(fixedCosts.length, fixedFilter) : null
+  // 絞り込みで一覧から外れた固定費でも、開いている間は右のフォームで編集できる
   const current = fixedCosts.find((f) => f.id === selection.id) ?? null
 
   const stats = [
-    { label: '月額の合計(年払いは12か月で割る)', value: yen(totals.monthly) },
+    {
+      label: fixedFilter === 'all' ? '月額の合計(年払いは12か月で割る)' : '月額の合計(サブスクを除く)',
+      value: yen(totals.monthly),
+    },
     { label: '年額', value: yen(totals.yearly) },
     { label: '件数', value: `${num(totals.count)}件` },
   ]
@@ -43,6 +50,8 @@ export function PcFixed({ selection, onSelect }: Props) {
             + 追加
           </button>
         </div>
+
+        <FixedFilterSwitch value={fixedFilter} onChange={setFixedFilter} className="pc-filter" />
 
         <div className="pc-stats">
           {stats.map((s) => (
@@ -68,14 +77,14 @@ export function PcFixed({ selection, onSelect }: Props) {
               </tr>
             </thead>
             <tbody>
-              {fixedCosts.length === 0 && (
+              {emptyMessage && (
                 <tr>
                   <td colSpan={6} className="table-empty">
-                    固定費はまだ登録されていません
+                    {emptyMessage}
                   </td>
                 </tr>
               )}
-              {sortFixedByDay(fixedCosts).map((f) => {
+              {sortFixedByDay(shown).map((f) => {
                 const ended = isEnded(f, thisMonth)
                 const selected = f.id === selection.id
                 return (

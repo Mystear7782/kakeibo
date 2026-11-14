@@ -1335,3 +1335,12 @@ input.strong {
 .cat-col .cat-list li:hover {
   background: var(--surface-2);
 }
+
+/* 固定費の表示の切り替え(すべて / サブスクを除く) */
+.segmented-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.pc-filter {
+  max-width: 320px;
+}

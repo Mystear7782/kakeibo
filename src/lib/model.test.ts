@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   buildCalendar,
+  filterFixed,
   fixedTotals,
   isEnded,
   subscriptionTotals,
@@ -86,6 +87,34 @@ describe('fixedTotals', () => {
     expect(isEnded({ end_month: '2026-11-01' }, '2026-11')).toBe(false)
     expect(isEnded({ end_month: '2026-10-01' }, '2026-11')).toBe(true)
     expect(isEnded({ end_month: null }, '2026-11')).toBe(false)
+  })
+})
+
+describe('filterFixed', () => {
+  const list = [
+    fixed({ id: 'rent', name: '家賃', amount: 72000 }),
+    fixed({ id: 'video', name: '動画配信', amount: 1590, is_subscription: true }),
+    fixed({ id: 'cloud', name: 'クラウド', amount: 13200, cycle: 'yearly', pay_month: 4, is_subscription: true }),
+  ]
+
+  it('すべてのときは、サブスクも含めた全件を返す', () => {
+    expect(filterFixed(list, 'all').map((f) => f.id)).toEqual(['rent', 'video', 'cloud'])
+  })
+
+  it('サブスクを除くときは、サブスクとして管理している固定費だけを外す', () => {
+    expect(filterFixed(list, 'exclude-subscription').map((f) => f.id)).toEqual(['rent'])
+  })
+
+  it('合計も、絞り込んだ一覧に合わせて変わる', () => {
+    const all = fixedTotals(filterFixed(list, 'all'), '2026-11')
+    const without = fixedTotals(filterFixed(list, 'exclude-subscription'), '2026-11')
+    expect(all.yearly).toBe(72000 * 12 + 1590 * 12 + 13200)
+    expect(without).toEqual({ monthly: 72000, yearly: 72000 * 12, count: 1 })
+  })
+
+  it('サブスクがなければ、どちらの表示も同じ', () => {
+    const plain = [fixed({ id: 'a' }), fixed({ id: 'b' })]
+    expect(filterFixed(plain, 'exclude-subscription')).toEqual(plain)
   })
 })
 

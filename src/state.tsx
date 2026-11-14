@@ -10,7 +10,18 @@ import {
 } from 'react'
 import { api } from './api'
 import { monthOf, todayJst } from './lib/date'
-import type { Category, FixedCost, PayMethod, Transaction, TxType } from './lib/model'
+import type { Category, FixedCost, FixedFilter, PayMethod, Transaction, TxType } from './lib/model'
+
+const FIXED_FILTER_KEY = 'kakeibo:fixed-filter'
+
+// 端末に残す表示の好み。読み書きできない環境(プライベートブラウズなど)でも動くようにする
+function loadFixedFilter(): FixedFilter {
+  try {
+    return localStorage.getItem(FIXED_FILTER_KEY) === 'exclude-subscription' ? 'exclude-subscription' : 'all'
+  } catch {
+    return 'all'
+  }
+}
 
 // モバイル版とPC版は、同じ状態を使う。ウィンドウ幅の変更で外枠が入れ替わっても、
 // 入力中の内容、編集中の明細、選択中の月と日、読み込み済みのデータを失わない。
@@ -32,6 +43,9 @@ export interface AppState {
 
   categories: Category[]
   fixedCosts: FixedCost[]
+  /** 固定費の一覧に、サブスクを含めるか。モバイル版とPC版で共有し、端末に残す */
+  fixedFilter: FixedFilter
+  setFixedFilter: (filter: FixedFilter) => void
   /** 明細や固定費が変わるたびに増える。各画面が読み直す合図になる */
   version: number
   /** 変更の後に呼ぶ。version を進め、費目と固定費を読み直す */
@@ -75,6 +89,15 @@ export function AppProvider({ email, onSignOut, children }: Props) {
   const [loaded, setLoaded] = useState(false)
   const [loadError, setLoadError] = useState(false)
   const [version, setVersion] = useState(0)
+  const [fixedFilter, setFixedFilterState] = useState<FixedFilter>(loadFixedFilter)
+  const setFixedFilter = useCallback((filter: FixedFilter) => {
+    setFixedFilterState(filter)
+    try {
+      localStorage.setItem(FIXED_FILTER_KEY, filter)
+    } catch {
+      // 保存できなくても、この画面の間は切り替えられる
+    }
+  }, [])
   const [toast, setToast] = useState('')
   const toastTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
 
@@ -150,6 +173,8 @@ export function AppProvider({ email, onSignOut, children }: Props) {
       onSignOut,
       categories,
       fixedCosts,
+      fixedFilter,
+      setFixedFilter,
       version,
       changed,
       toast,
@@ -157,7 +182,7 @@ export function AppProvider({ email, onSignOut, children }: Props) {
       entry: { draft, patch: patchDraft, startEdit, reset: resetDraft },
       cal: { ...cal, select },
     }),
-    [email, onSignOut, categories, fixedCosts, version, changed, toast, notify, draft, patchDraft, startEdit, resetDraft, cal, select],
+    [email, onSignOut, categories, fixedCosts, fixedFilter, setFixedFilter, version, changed, toast, notify, draft, patchDraft, startEdit, resetDraft, cal, select],
   )
 
   if (!loaded) {

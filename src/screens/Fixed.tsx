@@ -4,13 +4,15 @@ import { num, yen } from '../lib/format'
 import {
   PAY_LABELS,
   cycleLabel,
+  filterFixed,
   fixedTotals,
   isEnded,
   sortFixedByDay,
   type FixedCost,
+  type FixedFilter,
 } from '../lib/model'
 import { useApp } from '../state'
-import { COLORS, Header, Screen, Scroll } from '../ui'
+import { COLORS, Chip, Header, Screen, Scroll } from '../ui'
 
 type Props = {
   onNew: () => void
@@ -21,11 +23,44 @@ export function amountText(f: Pick<FixedCost, 'amount' | 'is_variable'>): string
   return `${f.is_variable ? '約' : ''}${yen(f.amount)}`
 }
 
+/** 一覧と合計に、サブスクを含めるかを切り替える。モバイル版とPC版の固定費画面で使う */
+export function FixedFilterSwitch({
+  value,
+  onChange,
+  className,
+}: {
+  value: FixedFilter
+  onChange: (filter: FixedFilter) => void
+  className?: string
+}) {
+  return (
+    <div role="group" aria-label="固定費の表示" className={className ? `segmented segmented-2 ${className}` : 'segmented segmented-2'}>
+      <Chip label="すべて" on={value === 'all'} color={COLORS.expense} className="segment" onClick={() => onChange('all')} />
+      <Chip
+        label="サブスクを除く"
+        on={value === 'exclude-subscription'}
+        color={COLORS.expense}
+        className="segment"
+        onClick={() => onChange('exclude-subscription')}
+      />
+    </div>
+  )
+}
+
+/** 絞り込みに合わせた、一覧が空のときの案内 */
+export function emptyFixedMessage(total: number, filter: FixedFilter): string | null {
+  if (total === 0) return '固定費はまだ登録されていません'
+  if (filter === 'exclude-subscription') return 'サブスク以外の固定費はありません'
+  return null
+}
+
 export function FixedScreen({ onNew, onOpen }: Props) {
-  const { fixedCosts, categories, email, onSignOut } = useApp()
+  const { fixedCosts, categories, email, onSignOut, fixedFilter, setFixedFilter } = useApp()
   const thisMonth = monthOf(todayJst())
   const catName = useMemo(() => new Map(categories.map((c) => [c.id, c.name])), [categories])
-  const totals = fixedTotals(fixedCosts, thisMonth)
+  const shown = filterFixed(fixedCosts, fixedFilter)
+  const totals = fixedTotals(shown, thisMonth)
+  const emptyMessage = shown.length === 0 ? emptyFixedMessage(fixedCosts.length, fixedFilter) : null
 
   return (
     <Screen>
@@ -41,8 +76,11 @@ export function FixedScreen({ onNew, onOpen }: Props) {
         }
       />
       <Scroll>
+        <FixedFilterSwitch value={fixedFilter} onChange={setFixedFilter} />
         <div className="card">
-          <div className="card-label">月額の合計(年払いは12か月で割る)</div>
+          <div className="card-label">
+            {fixedFilter === 'all' ? '月額の合計(年払いは12か月で割る)' : '月額の合計(サブスクを除く・年払いは12か月で割る)'}
+          </div>
           <div className="card-big" style={{ color: COLORS.expense }}>
             {yen(totals.monthly)}
           </div>
@@ -51,9 +89,9 @@ export function FixedScreen({ onNew, onOpen }: Props) {
           </div>
         </div>
 
-        {fixedCosts.length === 0 && <p className="empty">固定費はまだ登録されていません</p>}
+        {emptyMessage && <p className="empty">{emptyMessage}</p>}
         <ul className="list">
-          {sortFixedByDay(fixedCosts).map((f) => {
+          {sortFixedByDay(shown).map((f) => {
             const ended = isEnded(f, thisMonth)
             return (
               <li key={f.id}>

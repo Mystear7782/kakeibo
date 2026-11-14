@@ -102,6 +102,12 @@ export const sortFixedByDay = (list: FixedCost[]): FixedCost[] =>
 export const isEnded = (fixed: Pick<FixedCost, 'end_month'>, thisMonth: string): boolean =>
   fixed.end_month !== null && monthOf(fixed.end_month) < thisMonth
 
+/** 固定費の一覧の表示。all=すべて / exclude-subscription=サブスクを除く */
+export type FixedFilter = 'all' | 'exclude-subscription'
+
+export const filterFixed = (list: FixedCost[], filter: FixedFilter): FixedCost[] =>
+  filter === 'all' ? list : list.filter((f) => !f.is_subscription)
+
 // 固定費の合計。年払いは12で割って月額に含める。終了済みは含めない
 export function fixedTotals(list: FixedCost[], thisMonth: string) {
   const active = list.filter((f) => !isEnded(f, thisMonth))
