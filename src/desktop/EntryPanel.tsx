@@ -1,3 +1,4 @@
+import { MAX_DATE, MIN_DATE } from '../lib/date'
 import { digitsOnly, num } from '../lib/format'
 import { KIND_LABELS, PAY_LABELS, payMethodsFor, type TxType } from '../lib/model'
 import { Chip } from '../ui'
@@ -56,7 +57,15 @@ export function EntryPanel({ onOpenCategories }: Props) {
         </div>
         <div className="field">
           <label htmlFor="pc-date">日付</label>
-          <input id="pc-date" type="date" value={d.date} onChange={(ev) => patch({ date: ev.target.value })} />
+          <input
+            id="pc-date"
+            type="date"
+            min={MIN_DATE}
+            max={MAX_DATE}
+            aria-invalid={e.dateInvalid ? true : undefined}
+            value={d.date}
+            onChange={(ev) => patch({ date: ev.target.value })}
+          />
         </div>
       </div>
       {d.editing?.is_estimated && <p className="note">見込み額です。確定した金額に直して更新してください</p>}
@@ -108,7 +117,7 @@ export function EntryPanel({ onOpenCategories }: Props) {
         />
       </div>
 
-      {e.invalid && <p className="hint">金額と費目を入力してください</p>}
+      {e.invalid && <p className="hint">{e.dateInvalid ? e.dateHint : '金額と費目を入力してください'}</p>}
       <div className="panel-actions">
         {d.editing && (
           <button type="button" className="btn-outline" onClick={e.remove} disabled={e.busy}>

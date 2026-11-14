@@ -21,7 +21,7 @@ export function FixedFormScreen({ fixed, subscriptionPreset, onBack, onSaved, on
       <Scroll>
         <FixedFormFields f={f} onOpenCategories={onOpenCategories} />
       </Scroll>
-      <Footer hint={f.invalid && !f.endBeforeStart ? '名前、金額、費目を入力してください' : undefined}>
+      <Footer hint={f.fieldsMissing ? '名前、金額、費目を入力してください' : undefined}>
         {fixed && (
           <button type="button" className="btn-outline" onClick={f.remove} disabled={f.busy}>
             削除

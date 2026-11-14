@@ -14,6 +14,32 @@ export function todayJst(now: Date = new Date()): string {
   return `${get('year')}-${get('month')}-${get('day')}`
 }
 
+// 入力できる年の範囲。ブラウザの日付欄は6桁の年(例: 203301年)まで入れられてしまうため、アプリ側で制限する
+export const MIN_YEAR = 2000
+export const MAX_YEAR = 2100
+export const MIN_MONTH = `${MIN_YEAR}-01`
+export const MAX_MONTH = `${MAX_YEAR}-12`
+export const MIN_DATE = `${MIN_YEAR}-01-01`
+export const MAX_DATE = `${MAX_YEAR}-12-31`
+
+const inYearRange = (year: number): boolean => year >= MIN_YEAR && year <= MAX_YEAR
+
+/** 'YYYY-MM' の形式で、年が MIN_YEAR〜MAX_YEAR の範囲内 */
+export function isValidMonth(ym: string): boolean {
+  const m = /^(\d{4})-(0[1-9]|1[0-2])$/.exec(ym)
+  return !!m && inYearRange(Number(m[1]))
+}
+
+/** 'YYYY-MM-DD' の形式で、実在する日付、かつ年が MIN_YEAR〜MAX_YEAR の範囲内 */
+export function isValidDate(date: string): boolean {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date)
+  if (!m) return false
+  const [y, mo, d] = [Number(m[1]), Number(m[2]), Number(m[3])]
+  if (!inYearRange(y)) return false
+  const t = new Date(Date.UTC(y, mo - 1, d))
+  return t.getUTCFullYear() === y && t.getUTCMonth() === mo - 1 && t.getUTCDate() === d
+}
+
 export const monthOf = (date: string): string => date.slice(0, 7)
 
 export function addMonths(ym: string, delta: number): string {

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { api } from '../api'
-import { monthOf, todayJst } from '../lib/date'
+import { MAX_YEAR, MIN_YEAR, isValidMonth, monthOf, todayJst } from '../lib/date'
 import type { Cycle, FixedCost, FixedCostInput, PayMethod } from '../lib/model'
 import { useApp } from '../state'
 
@@ -43,8 +43,13 @@ export function useFixedForm({ fixed, subscriptionPreset, onDone }: Options) {
   const chips = selected && !visible.some((c) => c.id === selected.id) ? [...visible, selected] : visible
 
   const amountValue = Number(amount)
-  const endBeforeStart = !!end && !!start && end < start
-  const invalid = !name.trim() || !amountValue || !categoryId || !start || endBeforeStart
+  // 開始月は必須、終了月は任意。年は2000〜2100年に限る（日付欄は6桁の年まで入ってしまうため）
+  const rangeText = `${MIN_YEAR}年1月〜${MAX_YEAR}年12月`
+  const startError = isValidMonth(start) ? '' : `開始月は${rangeText}の範囲で入力してください`
+  const endError = !end || isValidMonth(end) ? '' : `終了月は${rangeText}の範囲で入力してください`
+  const endBeforeStart = !startError && !!end && !endError && end < start
+  const fieldsMissing = !name.trim() || !amountValue || !categoryId
+  const invalid = fieldsMissing || !!startError || !!endError || endBeforeStart
 
   async function save() {
     if (invalid || busy) return
@@ -107,7 +112,7 @@ export function useFixedForm({ fixed, subscriptionPreset, onDone }: Options) {
     variable, setVariable,
     auto, setAuto,
     subscription, setSubscription,
-    busy, endBeforeStart, invalid,
+    busy, startError, endError, endBeforeStart, fieldsMissing, invalid,
     save, remove,
   }
 }

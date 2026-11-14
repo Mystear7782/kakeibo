@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type CSSProperties } from 'react'
 import { api } from '../api'
-import { shortDate } from '../lib/date'
+import { MAX_DATE, MIN_DATE, shortDate } from '../lib/date'
 import { digitsOnly, num, yen } from '../lib/format'
 import {
   KIND_LABELS,
@@ -97,7 +97,15 @@ export function EntryScreen({ onOpenCategories }: Props) {
 
         <div className="field">
           <label htmlFor="date">日付</label>
-          <input id="date" type="date" value={d.date} onChange={(ev) => patch({ date: ev.target.value })} />
+          <input
+            id="date"
+            type="date"
+            min={MIN_DATE}
+            max={MAX_DATE}
+            aria-invalid={e.dateInvalid ? true : undefined}
+            value={d.date}
+            onChange={(ev) => patch({ date: ev.target.value })}
+          />
         </div>
 
         <fieldset className="field" aria-labelledby="catlabel">
@@ -161,7 +169,7 @@ export function EntryScreen({ onOpenCategories }: Props) {
           ))}
         </section>
       </Scroll>
-      <Footer hint={e.invalid ? '金額と費目を入力してください' : undefined}>
+      <Footer hint={e.invalid ? (e.dateInvalid ? e.dateHint : '金額と費目を入力してください') : undefined}>
         {d.editing && (
           <button type="button" className="btn-outline" onClick={e.remove} disabled={e.busy}>
             削除

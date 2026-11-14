@@ -1344,3 +1344,12 @@ input.strong {
 .pc-filter {
   max-width: 320px;
 }
+
+/* 入力の誤り */
+.note-error {
+  color: var(--expense);
+}
+
+input[aria-invalid='true'] {
+  border-color: var(--expense);
+}

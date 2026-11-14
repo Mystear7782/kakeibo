@@ -1,5 +1,51 @@
 import { describe, expect, it } from 'vitest'
-import { addMonths, daysInMonth, firstWeekday, monthEnd, shiftedSelection, shortDate, todayJst } from './date'
+import {
+  addMonths,
+  daysInMonth,
+  firstWeekday,
+  isValidDate,
+  isValidMonth,
+  monthEnd,
+  shiftedSelection,
+  shortDate,
+  todayJst,
+} from './date'
+
+describe('isValidMonth', () => {
+  it('2000年1月〜2100年12月の YYYY-MM だけを受け付ける', () => {
+    for (const ym of ['2000-01', '2026-11', '2100-12']) expect(isValidMonth(ym), ym).toBe(true)
+  })
+
+  it('6桁の年（ブラウザが受け付けてしまう値）や範囲外の年は受け付けない', () => {
+    for (const ym of ['203301-12', '1999-12', '2101-01', '0000-01', '99999-01']) {
+      expect(isValidMonth(ym), ym).toBe(false)
+    }
+  })
+
+  it('月が0や13以上、空や形式違いは受け付けない', () => {
+    for (const ym of ['2026-00', '2026-13', '', '2026', '2026/11', '2026-1']) {
+      expect(isValidMonth(ym), ym).toBe(false)
+    }
+  })
+})
+
+describe('isValidDate', () => {
+  it('実在する日付で、年が範囲内ならよい（閏日も）', () => {
+    for (const d of ['2026-11-14', '2000-01-01', '2100-12-31', '2028-02-29']) expect(isValidDate(d), d).toBe(true)
+  })
+
+  it('実在しない日付は受け付けない', () => {
+    for (const d of ['2026-02-30', '2027-02-29', '2026-13-01', '2026-00-10', '2026-04-31']) {
+      expect(isValidDate(d), d).toBe(false)
+    }
+  })
+
+  it('6桁の年や範囲外の年、空は受け付けない', () => {
+    for (const d of ['203301-12-01', '1999-12-31', '2101-01-01', '', '2026-1-1']) {
+      expect(isValidDate(d), d).toBe(false)
+    }
+  })
+})
 
 describe('shiftedSelection', () => {
   const today = '2026-11-14'

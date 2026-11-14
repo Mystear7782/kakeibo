@@ -1,3 +1,4 @@
+import { MAX_MONTH, MIN_MONTH } from '../lib/date'
 import { digitsOnly, num } from '../lib/format'
 import { FIXED_PAY_METHODS, PAY_LABELS, type CatKind } from '../lib/model'
 import { COLORS, Chip, Switch } from '../ui'
@@ -100,13 +101,31 @@ export function FixedFormFields({ f, onOpenCategories, idPrefix = 'f' }: Props) 
       <div className="grid grid-2">
         <div className="field">
           <label htmlFor={`${idPrefix}start`}>開始月</label>
-          <input id={`${idPrefix}start`} type="month" value={f.start} onChange={(e) => f.setStart(e.target.value)} />
+          <input
+            id={`${idPrefix}start`}
+            type="month"
+            min={MIN_MONTH}
+            max={MAX_MONTH}
+            aria-invalid={f.startError ? true : undefined}
+            value={f.start}
+            onChange={(e) => f.setStart(e.target.value)}
+          />
         </div>
         <div className="field">
           <label htmlFor={`${idPrefix}end`}>終了月(任意)</label>
-          <input id={`${idPrefix}end`} type="month" value={f.end} onChange={(e) => f.setEnd(e.target.value)} />
+          <input
+            id={`${idPrefix}end`}
+            type="month"
+            min={MIN_MONTH}
+            max={MAX_MONTH}
+            aria-invalid={f.endError ? true : undefined}
+            value={f.end}
+            onChange={(e) => f.setEnd(e.target.value)}
+          />
         </div>
       </div>
+      {f.startError && <p className="note note-error" role="alert">{f.startError}</p>}
+      {f.endError && <p className="note note-error" role="alert">{f.endError}</p>}
       {f.endBeforeStart && <p className="note">終了月は開始月と同じか、あとの月にしてください</p>}
 
       <div className="switches">

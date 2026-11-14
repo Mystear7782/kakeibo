@@ -19,7 +19,7 @@ export function FixedPanel({ fixed, subscriptionPreset, onDone }: Props) {
         <h2>{fixed ? `「${fixed.name}」を編集` : '固定費を登録'}</h2>
       </div>
       <FixedFormFields f={f} idPrefix="pf-" />
-      {f.invalid && !f.endBeforeStart && <p className="hint">名前、金額、費目を入力してください</p>}
+      {f.fieldsMissing && <p className="hint">名前、金額、費目を入力してください</p>}
       <div className="panel-actions">
         {fixed && (
           <button type="button" className="btn-outline" onClick={f.remove} disabled={f.busy}>

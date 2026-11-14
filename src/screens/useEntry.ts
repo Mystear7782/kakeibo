@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { api } from '../api'
+import { MAX_YEAR, MIN_YEAR, isValidDate } from '../lib/date'
 import {
   defaultPay,
   payMethodsFor,
@@ -26,7 +27,10 @@ export function useEntry() {
   const chips = selected && !visible.some((c) => c.id === selected.id) ? [...visible, selected] : visible
 
   const amountValue = Number(d.amount)
-  const invalid = !amountValue || !d.categoryId || !d.date
+  // 日付欄は6桁の年(例: 203301年)まで入ってしまうため、2000〜2100年の実在する日付に限る
+  const dateInvalid = !isValidDate(d.date)
+  const dateHint = `日付は${MIN_YEAR}年〜${MAX_YEAR}年の正しい日付を入力してください`
+  const invalid = !amountValue || !d.categoryId || dateInvalid
   const accent = accentOf(d.type)
   const payLabel = d.type === 'income' ? '入金先' : d.type === 'transfer' ? '出金元' : '支払方法'
 
@@ -88,6 +92,8 @@ export function useEntry() {
     chips,
     amountValue,
     invalid,
+    dateInvalid,
+    dateHint,
     busy,
     accent,
     payLabel,
